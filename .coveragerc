@@ -1,0 +1,3 @@
+[run]
+source = dc_house_hunting
+omit = dc_house_hunting/test*
