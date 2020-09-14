@@ -9,7 +9,8 @@ from sqlalchemy import (
     ForeignKey,
     Sequence,
     Date,
-    Boolean
+    Boolean,
+    Numeric
 )
 
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -71,7 +72,7 @@ class Residence(Base):
     laundry=Column(Boolean)
     basement=Column(Boolean)
     attic=Column(Boolean)
-    price_=Column(Integer)
+    price=Column(Numeric)
     notes=Column(String)
     bicycle_storage=Column(Boolean)
     interracial_neighborhood=Column(Boolean)
@@ -79,30 +80,6 @@ class Residence(Base):
     kitchen_cabinet_space=Column(Float)
     kitchen_counter_space=Column(Float)
     air_drying_clothes=Column(Boolean)
-
-    @hybrid_property
-    def price(self):
-
-        if self.price_ is None:
-            return None
-
-        else:
-            return price/100
-
-    @price.setter
-    def price(self,new_price):
-
-        self.price_=new_price*100
-
-    @price.expression
-    def price(cls):
-        return cls.price_
-
-    @price.update_expression
-    def price(cls,new_price):
-        return [
-            (cls.price_, new_price)
-        ]
 
 class School(Base):
 
