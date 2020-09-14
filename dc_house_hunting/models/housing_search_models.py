@@ -76,7 +76,6 @@ class Residence(Base):
     notes=Column(String)
     bicycle_storage=Column(Boolean)
     interracial_neighborhood=Column(Boolean)
-    congressional_representation=Column(Boolean)
     kitchen_cabinet_space=Column(Float)
     kitchen_counter_space=Column(Float)
     air_drying_clothes=Column(Boolean)
