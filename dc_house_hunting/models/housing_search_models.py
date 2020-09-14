@@ -64,13 +64,21 @@ class Residence(Base):
     residencetype=relationship(ResidenceType,foreign_keys=residencetype_id)
     parkingtype_id=Column(
         Integer,ForeignKey('parkingtype.id'))
+    parkingtype=relationship(ParkingType,foreign_keys=parkingtype_id)
     bedrooms=Column(Integer)
     bathrooms=Column(Integer)
     area=Column(Float)
     laundry=Column(Boolean)
     basement=Column(Boolean)
+    attic=Column(Boolean)
     price_=Column(Integer)
     notes=Column(String)
+    bicycle_storage=Column(Boolean)
+    interracial_neighborhood=Column(Boolean)
+    congressional_representation=Column(Boolean)
+    kitchen_cabinet_space=Column(Float)
+    kitchen_counter_space=Column(Float)
+    air_drying_clothes=Column(Boolean)
 
     @hybrid_property
     def price(self):
@@ -103,6 +111,49 @@ class School(Base):
     __table_args__={'mysql_encrypted':'yes'}
 
     id = Column(Integer, Sequence('school_seq'), primary_key=True)
+    name = Column(String)
     location_id=Column(
         Integer,ForeignKey('location.id'))
     location=relationship(Location,foreign_keys=location_id)
+    class_size=Column(Float)
+    lowest_grade=Column(Integer)
+    highest_grade=Column(Integer)
+
+class FoodSourceType(Base):
+
+    __tablename__='foodsourcetype'
+
+    id = Column(Integer, Sequence('foodsourcetype_seq'), primary_key=True)
+    name=Column(String)
+
+class FoodSource(Base):
+
+    __tablename__='foodsource'
+
+    __table_args__={'mysql_encrypted':'yes'}
+
+    id = Column(Integer, Sequence('foodsource_seq'), primary_key=True)
+
+    name=Column(String)
+
+    location_id=Column(
+        Integer,ForeignKey('location.id'))
+    location=relationship(Location,foreign_keys=location_id)
+    foodsourcetype_id=Column(
+        Integer,ForeignKey('foodsourcetype.id'))
+    kind=relationship(FoodSourceType,foreign_keys=foodsourcetype_id)
+
+class Park(Base):
+
+    __tablename__='park'
+
+    __table_args__={'mysql_encrypted':'yes'}
+
+    id = Column(Integer, Sequence('park_seq'), primary_key=True)
+
+    location_id=Column(
+        Integer,ForeignKey('location.id'))
+    location=relationship(Location,foreign_keys=location_id)
+
+    playground=Column(Boolean)
+    trees=Column(Boolean)
