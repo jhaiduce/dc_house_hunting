@@ -33,7 +33,39 @@
 
   <body>
 
-    <div class="starter-template">
+    {% if show_header %}
+      <header class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top white double-nav scrolling-navbar">
+
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+	  <span class="navbar-toggler-icon"></span>
+	</button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+	  <ul class="navbar-nav mr-auto">
+	    <li class="nav-item active dropdown">
+	      <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Residence</a>
+	      <div class="dropdown-menu">
+		  <a class="dropdown-item" href="/residence">List</a>
+	      </div>
+	    </li>
+	  </ul>
+	  <ul class="navbar-nav mr-auto">
+	    <li class="nav-item active dropdown">
+	      <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Settings</a>
+	      <div class="dropdown-menu">
+		  <a class="dropdown-item" href="/residencetype">Residence types</a>
+		  <a class="dropdown-item" href="/parkingtype">Parking types</a>
+	      </div>
+	    </li>
+	  </ul>
+	</div>
+
+      </header>
+
+	{% endif %}
+
+	<div class="starter-template">
       <div class="container">
             {% block content %}
                 <p>No content</p>
