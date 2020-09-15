@@ -87,7 +87,7 @@ class ResidenceCRUD(CRUDView):
                 widget=get_parkingtype_widget,
                 missing=None
             ),
-            'notes',            
+            'notes',
         ],
         overrides={
             'price':{
