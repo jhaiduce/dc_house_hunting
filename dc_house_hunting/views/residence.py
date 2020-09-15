@@ -75,9 +75,11 @@ class ResidenceCRUD(CRUDView):
             'bedrooms',
             'bathrooms',
             'laundry',
+            'laundry_hang_drying',
             'basement',
             'attic',
             'price',
+            'coop',
             colander.SchemaNode(
                 colander.Integer(),
                 name='parkingtype',
