@@ -70,6 +70,7 @@ class Residence(Base):
     bathrooms=Column(Integer)
     area=Column(Float)
     laundry=Column(Boolean)
+    laundry_hang_drying=Column(Boolean)
     basement=Column(Boolean)
     attic=Column(Boolean)
     price=Column(Numeric)
