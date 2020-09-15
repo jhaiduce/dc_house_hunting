@@ -73,12 +73,15 @@ class Residence(Base):
     basement=Column(Boolean)
     attic=Column(Boolean)
     price=Column(Numeric)
+    hoa_fee=Column(Numeric)
+    taxes=Column(Numeric)
     notes=Column(String)
     bicycle_storage=Column(Boolean)
     interracial_neighborhood=Column(Boolean)
     kitchen_cabinet_space=Column(Float)
     kitchen_counter_space=Column(Float)
     air_drying_clothes=Column(Boolean)
+    coop=Column(Boolean)
 
 class School(Base):
 
