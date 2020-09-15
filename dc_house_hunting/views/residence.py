@@ -119,4 +119,15 @@ class ResidenceCRUD(CRUDView):
 
         return appstruct
 
+    def address(obj):
+        return obj.location.street_address if obj.location else None
+
+    def city(obj):
+        return obj.location.city if obj.location else None
+
+    def state(obj):
+        return obj.location.state if obj.location else None
+
+    list_display=[address,city,state]
+
     url_path='/residence'
