@@ -50,16 +50,16 @@ def upgrade():
     sa.Column('basement', sa.Boolean(), nullable=True),
     sa.Column('price_', sa.Integer(), nullable=True),
     sa.Column('notes', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['location_id'], ['location.id'], name='fk_residence_location_id'),
-    sa.ForeignKeyConstraint(['parkingtype_id'], ['parkingtype.id'], name='fk_residence_parkingtype_id'),
-    sa.ForeignKeyConstraint(['residencetype_id'], ['residencetype.id'], name='fk_residence_residencetype_id'),
+    sa.ForeignKeyConstraint(['location_id'], ['location.id'], name='fk_residence_location_id_location'),
+    sa.ForeignKeyConstraint(['parkingtype_id'], ['parkingtype.id'], name='fk_residence_parkingtype_id_parkingtype'),
+    sa.ForeignKeyConstraint(['residencetype_id'], ['residencetype.id'], name='fk_residence_residencetype_id_residencetype'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_residence')),
     mysql_encrypted='yes'
     )
     op.create_table('school',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('location_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['location_id'], ['location.id'], name='fk_school_location_id'),
+    sa.ForeignKeyConstraint(['location_id'], ['location.id'], name='fk_school_location_id_location'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_school')),
     mysql_encrypted='yes'
     )
