@@ -7,7 +7,7 @@ This is a Pyramid web application to aid in a housing search
 1. Change directory into your newly created project.
 
   ```console
-  cd healthdata
+  cd dc_house_hunting
   ```
 
 2. Create a Python virtual environment.
@@ -31,7 +31,7 @@ env/bin/pip install -e ".[testing]"
 5. Initialize and upgrade the database
 
 ```console
-env/bin/initialize_healthdata_db development.ini
+env/bin/initialize_dc_house_hunting_db development.ini
 ```
 
 6. Run unit tests.
