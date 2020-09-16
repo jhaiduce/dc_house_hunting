@@ -89,3 +89,26 @@ class TestCRUD(BaseTest):
         self.assertEqual(residence.residencetype_id,1)
         self.assertEqual(residence.location.postal_code,'12345')
         self.assertEqual(residence.location.street_address,'123 Main')
+
+class AuthenticationTests(BaseTest):
+
+    def setUp(self):
+        super(AuthenticationTests, self).setUp()
+        self.init_database()
+
+        from .models import User
+
+        user=User(
+            name='admin'
+        )
+
+        user.set_password('password')
+        self.session.add(user)
+
+    def test_check_password(self):
+        from .models import User
+
+        user=self.session.query(User).filter(User.name=='admin').one()
+
+        self.assertTrue(user.check_password('password'))
+        self.assertFalse(user.check_password('pa$$word'))
