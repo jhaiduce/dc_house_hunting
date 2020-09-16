@@ -4,6 +4,7 @@ from pyramid import testing
 
 import transaction
 
+import json
 
 def dummy_request(dbsession):
     return testing.DummyRequest(dbsession=dbsession)
@@ -15,6 +16,9 @@ class BaseTest(unittest.TestCase):
             'sqlalchemy.url': 'sqlite:///:memory:'
         })
         self.config.include('.models')
+        self.config.include('pyramid_jinja2')
+        self.config.include('.routes')
+        self.config.scan()
         settings = self.config.get_settings()
 
         from .models import (
@@ -39,28 +43,49 @@ class BaseTest(unittest.TestCase):
         transaction.abort()
         Base.metadata.drop_all(self.engine)
 
-
-class TestMyViewSuccessCondition(BaseTest):
+class TestCRUD(BaseTest):
 
     def setUp(self):
-        super(TestMyViewSuccessCondition, self).setUp()
+        super(TestCRUD, self).setUp()
+
         self.init_database()
 
-        from .models import MyModel
+        from .models.housing_search_models import ResidenceType
+        from .models.housing_search_models import ParkingType
 
-        model = MyModel(name='one', value=55)
-        self.session.add(model)
+        self.session.add(ResidenceType(id=1,name='House'))
+        self.session.add(ParkingType(id=1,name='Street'))
 
-    def test_passing_view(self):
-        from .views.default import my_view
-        info = my_view(dummy_request(self.session))
-        self.assertEqual(info['one'].name, 'one')
-        self.assertEqual(info['project'], 'DC House Hunting')
+    def test_residence(self):
 
+        from .views.residence import ResidenceCRUD
+        from .models import Residence
 
-class TestMyViewFailureCondition(BaseTest):
+        request=testing.DummyRequest(post={
+            'save_close':'save_close',
+            'address':'123 Main',
+            'zip':'12345',
+            'basement':'true',
+            'bathrooms':'2',
+            'bedrooms':'2',
+            'city':'Washington',
+            'parkingtype':'1',
+            'residencetype':'1',
+            'state':'DC',
+            'notes':'',
+            'price':''
+        },dbsession=self.session)
 
-    def test_failing_view(self):
-        from .views.default import my_view
-        info = my_view(dummy_request(self.session))
-        self.assertEqual(info.status_int, 500)
+        views=ResidenceCRUD(request)
+
+        resp=views.edit()
+
+        self.assertEqual(resp.status_code,302)
+        residence_id=json.loads(resp.text)['id']
+
+        residence=self.session.query(Residence).filter(Residence.id==residence_id).one()
+
+        self.assertEqual(residence.parkingtype_id,1)
+        self.assertEqual(residence.residencetype_id,1)
+        self.assertEqual(residence.location.postal_code,'12345')
+        self.assertEqual(residence.location.street_address,'123 Main')
