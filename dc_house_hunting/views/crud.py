@@ -715,7 +715,7 @@ class CRUDView(object,metaclass=CRUDCreator):
 
     # Routing stuff
 
-    def redirect(self, route_name=None, *args, **kw):
+    def redirect(self, route_name=None, obj=None, *args, **kw):
         """
         Convenience function to create a redirect.
 
@@ -731,8 +731,23 @@ class CRUDView(object,metaclass=CRUDCreator):
         if route_name is None:
             route_name = self.request.matched_route.name
         return HTTPFound(
-            location=self.request.route_url(route_name, *args, **kw)
+            location=self.request.route_url(route_name),
+            *args, **kw
         )
+
+    def redirect_with_json(self,route_name=None,obj=None,*args,**kwargs):
+
+        if obj is not None:
+            self.dbsession.flush()
+            return self.redirect(
+                route_name=route_name,
+                content_type='application/json',
+                charset='',
+                text=json.dumps({'id':obj.id}),
+                *args,**kwargs
+            )
+        else:
+            return self.redirect(route_name=route_name,*args,**kwargs)
 
     def _get_route_pks(self, obj):
         """
@@ -1000,11 +1015,11 @@ class CRUDView(object,metaclass=CRUDCreator):
                     )
                 )
             elif action == 'save_close':
-                return self.redirect(self.routes['list'])
+                return self.redirect_with_json(self.routes['list'],obj)
             elif action == 'save_new':
-                return self.redirect(self.routes['new'])
+                return self.redirect_with_json(self.routes['new'],obj)
             elif action == 'cancel':
-                return self.redirect(self.routes['list'])
+                return self.redirect_with_json(self.routes['list'],obj)
             elif action == 'delete':
                 return HTTPFound(self._delete_confirm_route(obj))
             else:
