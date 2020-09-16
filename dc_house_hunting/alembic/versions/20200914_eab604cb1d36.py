@@ -16,9 +16,22 @@ branch_labels = None
 depends_on = None
 
 def upgrade():
+
+    connection = op.get_bind()
+
     with op.batch_alter_table('residence',schema=None,recreate='auto') as batch_op:
-        batch_op.alter_column('price_',new_column_name='price')
+        batch_op.alter_column('price_',new_column_name='price',type_=sa.Numeric())
+
+    # Divide price by 100 since we now treat the cents as a fraction
+    connection.execute('update residence set price=price/100')
 
 def downgrade():
+
+    connection = op.get_bind()
+
+    # Multiply by 100 so cents aren't lost to rounding in the conversion
+    # to Integer
+    connection.execute('update residence set price=price*100')
+
     with op.batch_alter_table('residence',schema=None,recreate='auto') as batch_op:
-        batch_op.alter_column('price',new_column_name='price_')
+        batch_op.alter_column('price',new_column_name='price_',type_=sa.Integer())
