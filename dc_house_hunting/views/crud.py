@@ -250,9 +250,10 @@ TypeError: formdata should be a multidict-type wrapper that supports the 'getlis
         * It returns this alias from the function so that it can be stored in
           the ``routes`` dictionary on the view.
         """
+        route=self._configure_route('list', '')
         self._configure_view('list',
                              renderer=self.view_class.get_template_for('list'))
-        return self._configure_route('list', '')
+        return route
 
     def configure_edit_view(self):
         """
@@ -290,9 +291,10 @@ TypeError: formdata should be a multidict-type wrapper that supports the 'getlis
         return the name of the route as well that will then be stored under the
         "new" key.
         """
+        route=self._configure_route('new', '/new')
         self._configure_view('edit', 'new',
                              renderer=self.view_class.get_template_for('edit'))
-        return self._configure_route('new', '/new')
+        return route
 
 
 class CRUDCreator(type):
