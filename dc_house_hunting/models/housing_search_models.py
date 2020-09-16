@@ -76,7 +76,7 @@ class Residence(Base):
     price=Column(Numeric)
     hoa_fee=Column(Numeric)
     taxes=Column(Numeric)
-    notes=Column(String(255))
+    notes=Column(Text)
     bicycle_storage=Column(Boolean)
     interracial_neighborhood=Column(Boolean)
     kitchen_cabinet_space=Column(Float)
