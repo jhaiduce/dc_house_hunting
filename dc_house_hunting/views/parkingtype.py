@@ -2,7 +2,7 @@ from .crud import CRUDView
 from ..models import ParkingType
 from colanderalchemy import SQLAlchemySchemaNode
 
-class ResidenceCRUD(CRUDView):
+class ParkingTypeCRUD(CRUDView):
 
     model=ParkingType
     schema=SQLAlchemySchemaNode(
