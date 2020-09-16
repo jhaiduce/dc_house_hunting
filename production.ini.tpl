@@ -12,7 +12,7 @@ pyramid.debug_notfound = false
 pyramid.debug_routematch = false
 pyramid.default_locale_name = en
 
-sqlalchemy.url = mysql://healthdata:{mysql_production_password_encoded}@househunting_db:3306/househunting
+sqlalchemy.url = mysql://househunting:{mysql_production_password_encoded}@househunting_db:3306/househunting
 sqlalchemy.pool_recycle=3600
 sqlalchemy.pool_pre_ping = true
 
