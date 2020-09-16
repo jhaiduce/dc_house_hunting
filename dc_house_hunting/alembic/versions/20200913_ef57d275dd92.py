@@ -18,8 +18,8 @@ depends_on = None
 def upgrade():
     op.create_table('location',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('street_address', sa.String(), nullable=True),
-    sa.Column('city', sa.String(), nullable=True),
+    sa.Column('street_address', sa.String(length=255), nullable=True),
+    sa.Column('city', sa.String(length=255), nullable=True),
     sa.Column('state', sa.String(length=2), nullable=True),
     sa.Column('postal_code', sa.String(length=5), nullable=True),
     sa.Column('lat', sa.Float(), nullable=True),
@@ -30,12 +30,12 @@ def upgrade():
     )
     op.create_table('parkingtype',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('name', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_parkingtype'))
     )
     op.create_table('residencetype',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('name', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_residencetype'))
     )
     op.create_table('residence',
@@ -49,7 +49,7 @@ def upgrade():
     sa.Column('laundry', sa.Boolean(), nullable=True),
     sa.Column('basement', sa.Boolean(), nullable=True),
     sa.Column('price_', sa.Integer(), nullable=True),
-    sa.Column('notes', sa.String(), nullable=True),
+    sa.Column('notes', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['location_id'], ['location.id'], name='fk_residence_location_id_location'),
     sa.ForeignKeyConstraint(['parkingtype_id'], ['parkingtype.id'], name='fk_residence_parkingtype_id_parkingtype'),
     sa.ForeignKeyConstraint(['residencetype_id'], ['residencetype.id'], name='fk_residence_residencetype_id_residencetype'),

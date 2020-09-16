@@ -28,8 +28,8 @@ class Location(Base):
     __table_args__={'mysql_encrypted':'yes'}
 
     id = Column(Integer, Sequence('location_seq'), primary_key=True)
-    street_address=Column(String)
-    city=Column(String)
+    street_address=Column(String(255))
+    city=Column(String(255))
     state=Column(String(2))
     postal_code=Column(String(5))
     lat = Column(Float)
@@ -41,14 +41,14 @@ class ResidenceType(Base):
     __tablename__='residencetype'
 
     id = Column(Integer, Sequence('residencetype_seq'), primary_key=True)
-    name=Column(String)
+    name=Column(String(255))
 
 class ParkingType(Base):
 
     __tablename__='parkingtype'
 
     id = Column(Integer, Sequence('parkingtype_seq'), primary_key=True)
-    name=Column(String)
+    name=Column(String(255))
 
 class Residence(Base):
 
@@ -76,7 +76,7 @@ class Residence(Base):
     price=Column(Numeric)
     hoa_fee=Column(Numeric)
     taxes=Column(Numeric)
-    notes=Column(String)
+    notes=Column(String(255))
     bicycle_storage=Column(Boolean)
     interracial_neighborhood=Column(Boolean)
     kitchen_cabinet_space=Column(Float)
@@ -91,7 +91,7 @@ class School(Base):
     __table_args__={'mysql_encrypted':'yes'}
 
     id = Column(Integer, Sequence('school_seq'), primary_key=True)
-    name = Column(String)
+    name = Column(String(255))
     location_id=Column(
         Integer,ForeignKey('location.id'))
     location=relationship(Location,foreign_keys=location_id)
@@ -104,7 +104,7 @@ class FoodSourceType(Base):
     __tablename__='foodsourcetype'
 
     id = Column(Integer, Sequence('foodsourcetype_seq'), primary_key=True)
-    name=Column(String)
+    name=Column(String(255))
 
 class FoodSource(Base):
 
@@ -114,7 +114,7 @@ class FoodSource(Base):
 
     id = Column(Integer, Sequence('foodsource_seq'), primary_key=True)
 
-    name=Column(String)
+    name=Column(String(255))
 
     location_id=Column(
         Integer,ForeignKey('location.id'))

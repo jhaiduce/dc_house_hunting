@@ -18,12 +18,12 @@ depends_on = None
 def upgrade():
     op.create_table('foodsourcetype',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('name', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_foodsourcetype'))
     )
     op.create_table('foodsource',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('name', sa.String(length=255), nullable=True),
     sa.Column('location_id', sa.Integer(), nullable=True),
     sa.Column('foodsourcetype_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['foodsourcetype_id'], ['foodsourcetype.id'], name=op.f('fk_foodsource_foodsourcetype_id_foodsourcetype')),
@@ -54,7 +54,7 @@ def upgrade():
         batch_op.add_column(sa.Column('class_size', sa.Float(), nullable=True))
         batch_op.add_column(sa.Column('highest_grade', sa.Integer(), nullable=True))
         batch_op.add_column(sa.Column('lowest_grade', sa.Integer(), nullable=True))
-        batch_op.add_column(sa.Column('name', sa.String(), nullable=True))
+        batch_op.add_column(sa.Column('name', sa.String(length=255), nullable=True))
 
 def downgrade():
     with op.batch_alter_table('school',schema=None,recreate='auto') as batch_op:
