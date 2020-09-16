@@ -7,20 +7,62 @@ from sqlalchemy.exc import OperationalError
 from .. import models
 
 
-def setup_models(dbsession):
+def setup_models(dbsession,ini_file):
     """
     Add or update models / fixtures in the database.
 
     """
-    model = models.mymodel.MyModel(name='one', value=1)
-    dbsession.add(model)
 
+    import alembic.config
+    alembicArgs = [
+        '-c',ini_file,
+        '--raiseerr',
+        'upgrade', 'head',
+    ]
+    alembic.config.main(argv=alembicArgs)
+    engine=dbsession.bind
+
+def create_database(engine,settings):
+
+    from sqlalchemy.sql import text
+    from MySQLdb import escape_string
+
+    conn=engine.connect()
+    conn.execute('commit')
+    conn.execute('create database if not exists househunting')
+    s=text("create or replace user househunting identified by '{pw}'".format(
+        pw=escape_string(settings['mysql_production_password']).decode('ascii')))
+    conn.execute(s)
+    conn.execute("grant all on househunting.* to househunting")
+    conn.execute("use househunting")
+
+def create_admin_user(dbsession,settings):
+
+    import sqlalchemy.exc
+
+    try:
+        user=models.User(
+            name='admin'
+        )
+
+        user.set_password(settings['admin_password'])
+
+        dbsession.add(user)
+
+        dbsession.flush()
+    except sqlalchemy.exc.IntegrityError:
+        pass
 
 def parse_args(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'config_uri',
         help='Configuration file, e.g., development.ini',
+    )
+    parser.add_argument(
+        '--delete-existing',
+        help='Delete existing database',
+        action='store_true'
     )
     return parser.parse_args(argv[1:])
 
@@ -30,19 +72,56 @@ def main(argv=sys.argv):
     setup_logging(args.config_uri)
     env = bootstrap(args.config_uri)
 
+    settings=env['request'].registry.settings
+
+    engine_admin=models.get_engine(settings,prefix='sqlalchemy_admin.')
+
+    while True:
+
+        # Here we try to connect to database server until connection succeeds.
+        # This is needed because the database server may take longer
+        # to start than the application
+
+        import sqlalchemy.exc
+
+        try:
+            print("Checking database connection")
+            conn=engine_admin.connect()
+            conn.execute("select 'OK'")
+
+        except sqlalchemy.exc.OperationalError:
+            import time
+            print("Connection failed. Sleeping.")
+            import traceback
+            traceback.print_exc()
+            time.sleep(2)
+            continue
+
+        # If we get to this line, connection has succeeded so we break
+        # out of the loop
+        break
+
     try:
+
+        if engine_admin.dialect.name!='sqlite':
+            if args.delete_existing:
+                conn=engine_admin.connect()
+                try:
+                    conn.execute('drop database househunting')
+                except OperationalError:
+                    pass
+            create_database(engine_admin,settings)
+
         with env['request'].tm:
             dbsession = env['request'].dbsession
-            setup_models(dbsession)
+            setup_models(dbsession,args.config_uri)
+
+            admin_exists=dbsession.query(models.User).filter(
+                models.User.name=='admin').count()
+            if not admin_exists:
+                create_admin_user(dbsession,settings)
+
     except OperationalError:
-        print('''
-Pyramid is having a problem using your SQL database.  The problem
-might be caused by one of the following things:
+        raise
 
-1.  You may need to initialize your database tables with `alembic`.
-    Check your README.txt for description and try to run it.
-
-2.  Your database server may not be running.  Check that the
-    database server referred to by the "sqlalchemy.url" setting in
-    your "development.ini" file is running.
-            ''')
+    print('Database setup complete.')
