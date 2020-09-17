@@ -2,6 +2,8 @@
 
 set -e
 
+source "deployment-includes.sh"
+
 numworkers=1
 
 DOTAGS=househunting
@@ -39,14 +41,8 @@ done
 
 join_token=$(docker-machine ssh $host_prefix-master docker swarm join-token -q worker)
 
-transfer_files="docker-compose.yml docker-compose.production.yml docker-compose.migrate.yml mysql-config-househunting.cnf secrets"
-rsync -avz -e "docker-machine ssh $host_prefix-master" $transfer_files :
-
-docker-machine ssh $host_prefix-master mkdir -p nginx/ssl
-
-rsync -avz -e "docker-machine ssh $host_prefix-master" nginx/*.conf :nginx
-
-rsync -avz -e "docker-machine ssh $host_prefix-master" nginx/ssl_production/*.pem :nginx/ssl
+# Upload configuration files and secrets
+upload_files
 
 function isSwarmNode(){
     host=$1
@@ -66,4 +62,35 @@ for i in $(seq 1 $numworkers); do
     fi
 done
 
+# Deploy the stack
+docker-machine ssh $host_prefix-master docker stack deploy -c docker-compose.yml -c docker-compose.production.yml househunting
+
+# Update images
+update_images
+
+# Update the database
 docker-machine ssh $host_prefix-master docker stack deploy -c docker-compose.yml -c docker-compose.production.yml -c docker-compose.migrate.yml househunting
+
+function wait_for_migration {
+
+    while [ 1 ]; do
+	desired_state=$( docker-machine ssh $host_prefix-master docker service ps --format '{{.DesiredState}}' househunting_migration )
+	current_state=$( docker-machine ssh $host_prefix-master docker service ps --format '{{.CurrentState}}' househunting_migration )
+
+	echo 'Migration' $desired_state $current_state
+
+	if [ $desired_state = 'Shutdown' ]; then
+	    return 0
+	fi
+
+	sleep 1
+    done
+}
+
+# Wait for it to complete
+wait_for_migration
+
+docker-machine ssh $host_prefix-master docker service logs househunting_migration
+
+# Delete the migration service
+docker-machine ssh $host_prefix-master docker service rm househunting_migration
