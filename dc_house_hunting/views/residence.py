@@ -122,14 +122,25 @@ class ResidenceCRUD(CRUDView):
         return appstruct
 
     def address(obj):
-        return obj.location.street_address if obj.location else None
+        from html import escape
+        return '{address}, {city}, {state}'.format(
+            address = escape(obj.location.street_address),
+            city=escape(obj.location.city),
+            state=escape(obj.location.state),
+        ) if obj.location else None
 
-    def city(obj):
-        return obj.location.city if obj.location else None
+    def url(obj):
+        from html import escape
 
-    def state(obj):
-        return obj.location.state if obj.location else None
+        try:
+            url=escape(obj.url)
+        except AttributeError:
+            return ''
+        else:
+            return '<a href="{url}">{url}</a>'.format(url=escape(obj.url))
 
-    list_display=[address,city,state]
+    url.info={'safe':True}
+
+    list_display=[address,url]
 
     url_path='/residence'
