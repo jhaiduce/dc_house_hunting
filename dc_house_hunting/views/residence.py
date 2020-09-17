@@ -74,6 +74,7 @@ class ResidenceCRUD(CRUDView):
             ),
             'bedrooms',
             'bathrooms',
+            'half_bathrooms',
             'laundry',
             'laundry_hang_drying',
             'basement',
@@ -88,6 +89,7 @@ class ResidenceCRUD(CRUDView):
                 missing=None
             ),
             'notes',
+            'url',
         ],
         overrides={
             'price':{
