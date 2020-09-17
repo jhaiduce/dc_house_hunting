@@ -52,6 +52,7 @@ class ResidenceCRUD(CRUDView):
     schema=SQLAlchemySchemaNode(
         Residence,
         includes=[
+            'url',
             colander.SchemaNode(
                 colander.String(),
                 name='address'),
@@ -89,7 +90,6 @@ class ResidenceCRUD(CRUDView):
                 missing=None
             ),
             'notes',
-            'url',
         ],
         overrides={
             'price':{
