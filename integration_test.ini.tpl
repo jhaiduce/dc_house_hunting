@@ -46,7 +46,7 @@ setup = dc_house_hunting.pshell.setup
 script_location = dc_house_hunting/alembic
 file_template = %%(year)d%%(month).2d%%(day).2d_%%(rev)s
 # file_template = %%(rev)s_%%(slug)s
-sqlalchemy.url = mysql://root:{mysql_root_password_encoded}@househunting_db:3306/househunting
+sqlalchemy.url = mysql://root:{mysql_root_password_encoded}@db:3306/househunting
 sqlalchemy.pool_recycle=14400
 
 [server:main]
