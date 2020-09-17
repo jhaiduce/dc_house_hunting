@@ -66,15 +66,7 @@ def parse_args(argv):
     )
     return parser.parse_args(argv[1:])
 
-
-def main(argv=sys.argv):
-    args = parse_args(argv)
-    setup_logging(args.config_uri)
-    env = bootstrap(args.config_uri)
-
-    settings=env['request'].registry.settings
-
-    engine_admin=models.get_engine(settings,prefix='sqlalchemy_admin.')
+def setup_server(engine_admin,settings,delete_existing=False):
 
     while True:
 
@@ -101,27 +93,36 @@ def main(argv=sys.argv):
         # out of the loop
         break
 
+    if engine_admin.dialect.name!='sqlite':
+        if delete_existing:
+            conn=engine_admin.connect()
+            try:
+                conn.execute('drop database househunting')
+            except OperationalError:
+                pass
+        create_database(engine_admin,settings)
+
+def main(argv=sys.argv):
+    args = parse_args(argv)
+    setup_logging(args.config_uri)
+    env = bootstrap(args.config_uri)
+
+    settings=env['request'].registry.settings
+
     try:
+        engine_admin=models.get_engine(settings,prefix='sqlalchemy_admin.')
+    except:
+        pass
+    else:
+        setup_server(engine_admin,settings,args.delete_existing)
 
-        if engine_admin.dialect.name!='sqlite':
-            if args.delete_existing:
-                conn=engine_admin.connect()
-                try:
-                    conn.execute('drop database househunting')
-                except OperationalError:
-                    pass
-            create_database(engine_admin,settings)
+    with env['request'].tm:
+        dbsession = env['request'].dbsession
+        setup_models(dbsession,args.config_uri)
 
-        with env['request'].tm:
-            dbsession = env['request'].dbsession
-            setup_models(dbsession,args.config_uri)
-
-            admin_exists=dbsession.query(models.User).filter(
-                models.User.name=='admin').count()
-            if not admin_exists:
-                create_admin_user(dbsession,settings)
-
-    except OperationalError:
-        raise
+        admin_exists=dbsession.query(models.User).filter(
+            models.User.name=='admin').count()
+        if not admin_exists:
+            create_admin_user(dbsession,settings)
 
     print('Database setup complete.')
