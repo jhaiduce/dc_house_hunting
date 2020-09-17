@@ -33,7 +33,7 @@
                                     {% elif col is false %}
                                         No
                                     {% else %}
-                                        {{col}}
+                                        {{col | safe}}
                                     {% endif %}
                             </td>
 			{% endfor %}

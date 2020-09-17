@@ -478,6 +478,10 @@ class CRUDView(object,metaclass=CRUDCreator):
           a prettier format, it additionally replaces any underscores by
           spaces and captializes each word.
 
+        * If the attribute ``info`` contains the key 'safe' with true value,
+          the column values will be rendered without escaping. Otherwise, the
+          column values will be escaped.
+
     .. _list_display_links:
 
     list_display_links
@@ -886,18 +890,28 @@ class CRUDView(object,metaclass=CRUDCreator):
                 title = title.__name__
             if isinstance(col, (six.text_type, six.binary_type)):
                 if hasattr(obj, col):
-                    col = getattr(obj, col)
+                    col_value = getattr(obj, col)
                     if callable(col):
-                        col = col()
+                        col_value = col()
                 # column on view
                 else:
-                    col = getattr(self, col)
+                    col_value = getattr(self, col)
                     if callable(col):
                         col = col(obj)
             # must be a separate callable
             else:
-                col = col(obj)
-            yield title, col
+                col_value = col(obj)
+
+            try:
+                info=dict(getattr(col,'info', {}))
+            except:
+                info={}
+
+            if not info.get('safe',False):
+                from html import escape
+                col_value=escape(col_value)
+
+            yield title, col_value
 
     def get_list_query(self):
         return self.dbsession.query(self.model)
