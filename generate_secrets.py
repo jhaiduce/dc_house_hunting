@@ -1,4 +1,4 @@
-from subprocess import call
+from subprocess import check_call
 import os
 import random
 import string
@@ -24,33 +24,33 @@ def write_password(filename,overwrite=False,*args,**kwargs):
         pw=open(filename).read()
     return pw
 
-def generate_secrets(secrets_dir='secrets',ini_template='production.ini.tpl',iniout='production.ini'):
+def generate_secrets(secrets_dir='secrets',ini_template='production.ini.tpl',iniout='production.ini',hostname='localhost.localdomain'):
     if not os.path.exists(secrets_dir):
         os.mkdir(secrets_dir)
 
-    if not (os.path.exists(secrets_dir+'/ca-key.pem') or os.path.exists(secrets_dir+'/ca.pem')):
+    if not (os.path.exists(secrets_dir+'/ca-key.pem') and os.path.exists(secrets_dir+'/ca.pem')):
         print('Generating root certificate')
-        call(['openssl','genrsa','2048'],stdout=open(secrets_dir+'/ca-key.pem','w'))
-        call(['openssl','req','-new','-x509','-nodes','-days','365000',
+        check_call(['openssl','genrsa','2048'],stdout=open(secrets_dir+'/ca-key.pem','w'))
+        check_call(['openssl','req','-new','-x509','-nodes','-days','365000',
               '-key',secrets_dir+'/ca-key.pem','-out',secrets_dir+'/ca.pem'])
 
     if not (os.path.exists(secrets_dir+'/server-key.pem') or os.path.exists(secrets_dir+'/server-req.pem')):
 
         print('Generating server key')
-        call(['openssl','req','-newkey','rsa:2048','-days','365000','-nodes',
+        check_call(['openssl','req','-newkey','rsa:2048','-days','365000','-nodes',
               '-keyout',secrets_dir+'/server-key.pem','-out',secrets_dir+'/server-req.pem'])
-        call(['openssl','rsa','-in',secrets_dir+'/server-key.pem',
+        check_call(['openssl','rsa','-in',secrets_dir+'/server-key.pem',
               '-out',secrets_dir+'/server-key.pem'])
 
     if not os.path.exists(secrets_dir+'/server-cert.pem'):
 
         print('Generating server certificate')
-        call(['openssl','x509','-req','-in',secrets_dir+'/server-req.pem',
+        check_call(['openssl','x509','-req','-in',secrets_dir+'/server-req.pem',
               '-days','365000','-CA',secrets_dir+'/ca.pem',
               '-CAkey',secrets_dir+'/ca-key.pem','-set_serial','01',
               '-out',secrets_dir+'/server-cert.pem'])
 
-    call(['openssl','verify','-CAfile',secrets_dir+'/ca.pem',secrets_dir+'/server-cert.pem'])
+    check_call(['openssl','verify','-CAfile',secrets_dir+'/ca.pem',secrets_dir+'/server-cert.pem'])
 
     if not os.path.exists(secrets_dir+'/storage_key.keyfile'):
 
@@ -58,12 +58,12 @@ def generate_secrets(secrets_dir='secrets',ini_template='production.ini.tpl',ini
         storage_key=open(secrets_dir+'/storage_key.keyfile','w')
         storage_key.write('1;')
         storage_key.flush()
-        call(['openssl','rand','-hex','32'],stdout=storage_key)
+        check_call(['openssl','rand','-hex','32'],stdout=storage_key)
 
     if not os.path.exists(secrets_dir+'/dhparams.pem'):
 
         # Generate dhparams.pem
-        call(['openssl','dhparam',
+        check_call(['openssl','dhparam',
               '-out',os.path.join(secrets_dir,'dhparams.pem'),
               '4096'])
 
