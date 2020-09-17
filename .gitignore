@@ -24,3 +24,4 @@ test
 secrets
 integration_test_secrets
 *.sqlite
+nginx/ssl
