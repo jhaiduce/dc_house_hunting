@@ -68,6 +68,7 @@ class Residence(Base):
     parkingtype=relationship(ParkingType,foreign_keys=parkingtype_id)
     bedrooms=Column(Integer)
     bathrooms=Column(Integer)
+    half_bathrooms=Column(Integer)
     area=Column(Float)
     laundry=Column(Boolean)
     laundry_hang_drying=Column(Boolean)
@@ -83,6 +84,7 @@ class Residence(Base):
     kitchen_counter_space=Column(Float)
     air_drying_clothes=Column(Boolean)
     coop=Column(Boolean)
+    url=Column(Text)
 
 class School(Base):
 
