@@ -67,6 +67,45 @@ def generate_secrets(secrets_dir='secrets',ini_template='production.ini.tpl',ini
               '-out',os.path.join(secrets_dir,'dhparams.pem'),
               '4096'])
 
+    if not os.path.exists(os.path.join(secrets_dir,hostname+'.key')):
+
+        # Generate key for webserver
+        check_call(['openssl','genrsa',
+              '-out',os.path.join(secrets_dir,hostname+'.key'),'2048'])
+
+    if not os.path.exists(os.path.join(secrets_dir,hostname+'.csr')):
+
+        # Generate CSR
+        check_call(['openssl','req','-new',
+              '-key',os.path.join(secrets_dir,hostname+'.key'),
+              '-out',os.path.join(secrets_dir,hostname+'.csr')])
+
+    if not os.path.exists(os.path.join(secrets_dir,hostname+'.ext')):
+
+        with open(os.path.join(secrets_dir,hostname+'.ext'),'w') as fh:
+
+            fh.write(
+                """
+                authorityKeyIdentifier=keyid,issuer
+                basicConstraints=CA:FALSE
+                keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+                subjectAltName = @alt_names
+                [alt_names]
+                DNS.1 = {}
+                """.format(hostname))
+
+    if not os.path.exists(os.path.join(secrets_dir,hostname+'.crt')):
+
+        # Generate certificate
+        check_call(['openssl','x509','-req',
+                    '-in',os.path.join(secrets_dir,hostname+'.csr'),
+                    '-CA',os.path.join(secrets_dir,'ca.pem'),
+                    '-CAkey',os.path.join(secrets_dir,'ca-key.pem'),
+                    '-CAcreateserial',
+                    '-out',os.path.join(secrets_dir,hostname+'.crt'),
+                    '-days','825','-sha256',
+                    '-extfile',os.path.join(secrets_dir,hostname+'.ext')])
+
     mysql_pwd_chars=(letters+string.digits+string.punctuation)
     for c in ["'"]:
         mysql_pwd_chars=mysql_pwd_chars.replace(c,'')
@@ -98,7 +137,10 @@ if __name__=='__main__':
                         help='Template for Pyramid config file')
     parser.add_argument('--ini-filename',default='production.ini',
                         help='Name of ini file')
+    parser.add_argument('--hostname',default='localhost.localdomain',
+                        help='Web server hostname')
     args=parser.parse_args()
 
     generate_secrets(args.secretsdir,
-                     ini_template=args.ini_template,iniout=args.ini_filename)
+                     ini_template=args.ini_template,iniout=args.ini_filename,
+                     hostname=args.hostname)
