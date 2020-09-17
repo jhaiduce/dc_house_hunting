@@ -1,0 +1,34 @@
+version: '3.7'
+secrets:
+  storage_key:
+    name: storage_key.1
+    file: ./secrets/storage_key.keyfile
+  mysql_root_password:
+    name: mysql_root_password.1
+    file: ./secrets/db_root_pw
+  mysql_production_password:
+    name: mysql_production_password
+    file: ./secrets/db_app_pw
+  pyramid_auth_secret:
+    name: pyramid_auth_secret.1
+    file: ./secrets/pyramid_auth_secret
+  app_admin_password:
+    name: app_admin_password.1
+    file: ./secrets/app_admin_pw
+  pyramid_main_ini:
+    name: production.ini.1
+    file: ./secrets/production.ini
+  mysql_ca:
+    file: ./secrets/ca.pem
+  mysql_cert:
+    file: ./secrets/server-cert.pem
+  mysql_key:
+    file: ./secrets/server-key.pem
+  dhparams:
+    file: ./secrets/dhparams.pem
+  ssl_certificate:
+    name: ssl_certificate.1
+    file: ./nginx/ssl/fullchain.pem
+  ssl_certificate_key:
+    name: ssl_certificate_key.1
+    file: ./nginx/ssl/privkey.pem

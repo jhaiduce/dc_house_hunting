@@ -3,7 +3,7 @@
 set -e
 
 # Migrate database
-sudo docker-compose -f docker-compose.test_secrets.yml -f docker-compose.db.yml -f docker-compose.migrate.yml -p househunting_ci up -d
+sudo docker-compose -f docker-compose.yml -f docker-compose.test.yml -f docker-compose.migrate.yml -p househunting_ci up --remove-orphans -d
 
 result=$(sudo docker wait househunting_ci_migration_1)
 

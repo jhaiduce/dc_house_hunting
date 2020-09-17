@@ -1,0 +1,90 @@
+version: '3.7'
+services:
+  db:
+    image: mariadb
+    deploy:
+      resources:
+        reservations:
+          memory: 200M
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    configs:
+      - source: mysql-config
+        target: /etc/mysql/conf.d/mysql-config-househunting.cnf
+    secrets:
+      - source: mysql_root_password
+        target: /run/secrets/mysql_root_password
+      - source: storage_key
+        target: /etc/mysql/encryption/keyfile
+      - source: mysql_ca
+        target: /etc/my.cnf.d/certificates/ca.pem
+      - source: mysql_cert
+        target: /etc/my.cnf.d/certificates/server-cert.pem
+      - source: mysql_key
+        target: /etc/my.cnf.d/certificates/server-key.pem
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image:
+      jhaiduce/househunting
+    deploy:
+      replicas: 2
+      resources:
+        reservations:
+          memory: 200M
+    secrets:
+      - source: pyramid_main_ini
+        target: /run/secrets/production.ini
+    links:
+      - db
+  nginx:
+    image: nginx
+    deploy:
+      resources:
+        reservations:
+          memory: 100M
+    ports:
+      - 80:80
+      - 443:443
+    configs:
+      - source: nginx-conf-househunting
+        target: /etc/nginx/conf.d/househunting.conf
+      - source: nginx-conf-common
+        target: /etc/nginx/common.conf
+      - source: nginx-conf-common-location
+        target: /etc/nginx/conf.d/common-location.conf
+      - source: nginx-conf-ssl
+        target: /etc/nginx/ssl.conf
+      - source: nginx-conf-default
+        target: /etc/nginx/conf.d/default.conf
+    secrets:
+      - source: ssl_certificate
+        target: /etc/ssl/private/fullchain.pem
+      - source: ssl_certificate_key
+        target: /etc/ssl/private/privkey.pem
+      - source: dhparams
+        target: /etc/nginx/dhparams.pem
+    links:
+      - web
+volumes:
+  mysql-data:
+configs:
+  mysql-config:
+    name: mysql-config.2
+    file: ./mysql-config-househunting.cnf
+  nginx-conf-househunting:
+    name: nginx-conf-househunting.2
+    file: ./nginx/househunting.conf
+  nginx-conf-common:
+    file: ./nginx/common.conf
+  nginx-conf-common-location:
+    file: ./nginx/common_location.conf
+  nginx-conf-ssl:
+    file: nginx/ssl.conf
+  nginx-conf-default:
+    file: nginx/default.conf
