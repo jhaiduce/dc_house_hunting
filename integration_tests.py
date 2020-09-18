@@ -40,3 +40,39 @@ class BaseTest(unittest.TestCase):
         resp=self.session.get('http://web/residence')
         self.assertEqual(resp.history[0].status_code,302)
         self.assertEqual(resp.history[0].headers['Location'],'http://web/login?next=http%3A%2F%2Fweb%2Fresidence')
+
+    def test_residence_crud(self):
+
+        resp=self.session.post(
+            'http://web/residence/new',
+            data={
+            'save_close':'save_close',
+            'address':'123 Main',
+            'zip':'12345',
+            'basement':'true',
+            'bathrooms':'2',
+            'bedrooms':'2',
+            'city':'Washington',
+            'parkingtype':'',
+            'residencetype':'',
+            'state':'DC',
+            'notes':'',
+            'price':''
+        })
+
+        # Check that we got redirected
+        try:
+            self.assertEqual(resp.history[0].status_code,302)
+        except IndexError:
+            print(resp.text)
+            raise
+
+        # Get the id of the new entry
+        submission_metadata=json.loads(resp.history[0].text)
+        id=submission_metadata['id']
+
+        # Load the residence listing page
+        resp=self.session.get('http://web/residence')
+
+        # Check that the new entry is listed
+        self.assertIsNotNone(re.search(r'a href="https?://.+/residence/{}/edit"'.format(id),resp.text))
