@@ -14,7 +14,7 @@ import requests
 from decimal import Decimal
 import re
 
-def import_brightmls(content):
+def import_brightmls(content,url=None):
     
     soup=BeautifulSoup(content,features='lxml')
     
@@ -70,7 +70,8 @@ def import_brightmls(content):
             half_bathrooms=halfbaths,
             area=floorspace,
             lotsize=lotsize,
-            price=price))
+            price=price,
+            url=url))
             
     return residences
 
@@ -93,7 +94,7 @@ def import_from_url(url):
     content=requests.get(url).content
 
     if hostname.endswith('brightmls.com'):
-        objects=import_brightmls(content)
+        objects=import_brightmls(content,url)
 
     for obj in objects:
         dbsession.add(obj)
