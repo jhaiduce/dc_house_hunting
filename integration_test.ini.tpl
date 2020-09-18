@@ -73,12 +73,12 @@ handlers = console
 
 [logger_dc_house_hunting]
 level = DEBUG
-handlers =
+handlers = console
 qualname = dc_house_hunting
 
 [logger_sqlalchemy]
 level = WARN
-handlers =
+handlers = console
 qualname = sqlalchemy.engine
 # "level = INFO" logs SQL queries.
 # "level = DEBUG" logs SQL queries and results.
