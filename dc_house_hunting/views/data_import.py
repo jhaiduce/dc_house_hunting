@@ -34,7 +34,11 @@ class ImportViews(object):
             except deform.ValidationFailure as e:
                 return dict(form=e.render())
 
-            url=self.request.route_url('home')
-            return HTTPFound(url)
+            from ..tasks.data_import import import_from_url
+            import_from_url.delay(appstruct['url'])
+
+            redirect_url=self.request.route_url('home')
+
+            return HTTPFound(redirect_url)
 
         return dict(form=form)
