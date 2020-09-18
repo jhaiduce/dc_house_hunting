@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+    image: househunting_integration_test
     secrets:
       - source: pyramid_main_ini
         target: /run/secrets/production.ini
