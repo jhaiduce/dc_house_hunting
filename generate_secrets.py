@@ -124,7 +124,8 @@ def generate_secrets(secrets_dir='secrets',ini_template='production.ini.tpl',ini
         mysql_root_password_encoded=quote_plus(db_root_pw).replace('%','%%'),
         app_admin_password=app_admin_pw.replace('%','%%'),
         pyramid_auth_secret=pyramid_auth_secret.replace('%','%%'),
-        session_secret=pyramid_session_secret.decode('ascii').replace('%','%%')
+        session_secret=pyramid_session_secret.decode('ascii').replace('%','%%'),
+        rabbitmq_password_encoded=quote_plus(rabbitmq_password).replace('%','%%'),
     )
     open(os.path.join(secrets_dir,iniout),'w').write(ini_text)
 
