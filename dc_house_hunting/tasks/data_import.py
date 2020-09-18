@@ -69,7 +69,8 @@ def import_brightmls(content):
             bathrooms=bathrooms,
             half_bathrooms=halfbaths,
             area=floorspace,
-            lotsize=lotsize))
+            lotsize=lotsize,
+            price=price))
             
     return residences
 
