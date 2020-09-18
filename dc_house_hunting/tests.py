@@ -112,3 +112,10 @@ class AuthenticationTests(BaseTest):
 
         self.assertTrue(user.check_password('password'))
         self.assertFalse(user.check_password('pa$$word'))
+
+class DataImportTests(BaseTest):
+
+    def test_import_brightmls(self):
+
+        from .tasks.data_import import import_brightmls
+        import_brightmls(open('brightmls_testdata.html').read())

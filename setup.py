@@ -24,6 +24,8 @@ requires = [
     'colanderalchemy',
     'bcrypt',
     'pyramid_nacl_session',
+    'celery',
+    'lxml',
 ]
 
 tests_require = [
