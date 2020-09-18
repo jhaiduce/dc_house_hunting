@@ -82,3 +82,19 @@ class BaseTest(unittest.TestCase):
 
         # Check that the new entry is listed
         self.assertIsNotNone(re.search(r'a href="https?://.+/residence/{}/edit"'.format(id),resp.text))
+
+    def test_import(self):
+
+        resp=self.session.post(
+            'https://localhost.localdomain/import',
+            data={
+            'submit':'submit',
+            'url':'https://matrix.brightmls.com/Matrix/Public/Portal.aspx?ID=16150598256',
+        })
+
+        # Check that we got redirected
+        try:
+            self.assertEqual(resp.history[0].status_code,302)
+        except IndexError:
+            print(resp.text)
+            raise

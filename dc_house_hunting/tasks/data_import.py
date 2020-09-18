@@ -93,6 +93,9 @@ def import_from_url(url):
     content=requests.get(url).content
 
     if hostname.endswith('brightmls.com'):
-        dbsession.add(import_brightmls(content))
+        objects=import_brightmls(content)
+
+    for obj in objects:
+        dbsession.add(obj)
 
     transaction.commit()
