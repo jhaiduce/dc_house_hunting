@@ -1,10 +1,5 @@
 export VENV=`pwd`/../venv
 
-# Kill running containers
-sudo docker kill househunting_web
-sudo docker kill househunting_ci_integration_test_1
-sudo docker kill househunting_ci_migration_1
-
 set -e
 
 # Run unit tests
@@ -22,8 +17,8 @@ sudo docker-compose -f docker-compose.yml -f docker-compose.test.yml -f docker-c
 # Run database migration
 ./migrate_db_ci.sh
 
-# Run tests
-sudo docker-compose -f docker-compose.yml -f docker-compose.test.yml -f docker-compose.integration_tests.yml -p househunting_ci up --remove-orphans -d
+# Run integration tests
+sudo docker-compose -f docker-compose.yml -f docker-compose.test.yml -f docker-compose.integration_tests.yml -p househunting_ci up --force-recreate -d
 
 # Print test logs
 sudo docker logs -f househunting_ci_integration_test_1
