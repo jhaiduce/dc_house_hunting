@@ -24,23 +24,28 @@ class BaseTest(unittest.TestCase):
                     'password':self.admin_password,
                     'form.submitted':'Log+In'
                 })
+                if resp.status_code!=200: continue
                 break
             except requests.exceptions.ConnectionError:
                 print('Connection failed. Sleeping before retry.')
                 import time
                 time.sleep(2)
 
-        self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://localhost.localdomain/')
+        try:
+            self.assertEqual(resp.history[0].status_code,302)
+        except IndexError:
+            print(resp.text)
+            raise
+        self.assertEqual(resp.history[0].headers['Location'],'https://localhost.localdomain/')
 
     def tearDown(self):
         resp=self.session.post('https://localhost.localdomain/logout')
         self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://localhost.localdomain/')
+        self.assertEqual(resp.history[0].headers['Location'],'https://localhost.localdomain/')
 
         resp=self.session.get('https://localhost.localdomain/residence')
         self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://localhost.localdomain/login?next=http%3A%2F%2Flocalhost.localdomain%2Fresidence')
+        self.assertEqual(resp.history[0].headers['Location'],'https://localhost.localdomain/login?next=https%3A%2F%2Flocalhost.localdomain%2Fresidence')
 
     def test_residence_crud(self):
 
@@ -73,7 +78,7 @@ class BaseTest(unittest.TestCase):
         id=submission_metadata['id']
 
         # Load the residence listing page
-        resp=self.session.get('http://localhost.localdomain/residence')
+        resp=self.session.get('https://localhost.localdomain/residence')
 
         # Check that the new entry is listed
         self.assertIsNotNone(re.search(r'a href="https?://.+/residence/{}/edit"'.format(id),resp.text))
