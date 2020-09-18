@@ -18,7 +18,7 @@ class BaseTest(unittest.TestCase):
 
         while True:
             try:
-                resp=self.session.post('http://househunting_web/login',data={
+                resp=self.session.post('http://web/login',data={
                     'login':'admin',
                     'password':self.admin_password,
                     'form.submitted':'Log+In'
@@ -30,13 +30,13 @@ class BaseTest(unittest.TestCase):
                 time.sleep(2)
 
         self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://househunting_web/period')
+        self.assertEqual(resp.history[0].headers['Location'],'http://web/')
 
     def tearDown(self):
-        resp=self.session.post('http://househunting_web/logout')
+        resp=self.session.post('http://web/logout')
         self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://househunting_web/')
+        self.assertEqual(resp.history[0].headers['Location'],'http://web/')
 
-        resp=self.session.get('http://househunting_web/residence')
+        resp=self.session.get('http://web/residence')
         self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://househunting_web/login?next=http%3A%2F%2Fhousehunting_web%2Fresidence')
+        self.assertEqual(resp.history[0].headers['Location'],'http://web/login?next=http%3A%2F%2Fweb%2Fresidence')
