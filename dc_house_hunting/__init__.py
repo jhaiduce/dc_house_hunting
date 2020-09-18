@@ -4,6 +4,7 @@ from pyramid.session import JSONSerializer
 from pyramid_nacl_session import EncryptedCookieSessionFactory
 
 import binascii
+from . import celery
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
