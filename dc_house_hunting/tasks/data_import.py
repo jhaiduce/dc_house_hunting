@@ -92,4 +92,6 @@ def import_from_url(url):
     content=requests.get(url).content
 
     if hostname.endswith('brightmls.com'):
-        import_brightmls(content)
+        dbsession.add(import_brightmls(content))
+
+    transaction.commit()
