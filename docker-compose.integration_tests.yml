@@ -1,6 +1,7 @@
 version: '3.7'
 services:
   integration_test:
+    network_mode: 'host'
     build:
       context: .
       dockerfile: Dockerfile.test
@@ -8,5 +9,7 @@ services:
     secrets:
       - source: pyramid_main_ini
         target: /run/secrets/production.ini
-    links:
-      - web
+      - source: ssl_certificate
+        target: /etc/ssl/localhost.localdomain.crt
+      - source: mysql_ca
+        target: /etc/ssl/ca.pem

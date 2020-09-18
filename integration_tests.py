@@ -10,6 +10,7 @@ class BaseTest(unittest.TestCase):
 
     def setUp(self):
         self.session=requests.Session()
+        self.session.verify='/etc/ssl/ca.pem'
 
         self.config=configparser.ConfigParser()
         self.config.read('/run/secrets/production.ini')
@@ -18,7 +19,7 @@ class BaseTest(unittest.TestCase):
 
         while True:
             try:
-                resp=self.session.post('http://web/login',data={
+                resp=self.session.post('https://localhost.localdomain/login',data={
                     'login':'admin',
                     'password':self.admin_password,
                     'form.submitted':'Log+In'
@@ -30,21 +31,21 @@ class BaseTest(unittest.TestCase):
                 time.sleep(2)
 
         self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://web/')
+        self.assertEqual(resp.history[0].headers['Location'],'http://localhost.localdomain/')
 
     def tearDown(self):
-        resp=self.session.post('http://web/logout')
+        resp=self.session.post('https://localhost.localdomain/logout')
         self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://web/')
+        self.assertEqual(resp.history[0].headers['Location'],'http://localhost.localdomain/')
 
-        resp=self.session.get('http://web/residence')
+        resp=self.session.get('https://localhost.localdomain/residence')
         self.assertEqual(resp.history[0].status_code,302)
-        self.assertEqual(resp.history[0].headers['Location'],'http://web/login?next=http%3A%2F%2Fweb%2Fresidence')
+        self.assertEqual(resp.history[0].headers['Location'],'http://localhost.localdomain/login?next=http%3A%2F%2Flocalhost.localdomain%2Fresidence')
 
     def test_residence_crud(self):
 
         resp=self.session.post(
-            'http://web/residence/new',
+            'https://localhost.localdomain/residence/new',
             data={
             'save_close':'save_close',
             'address':'123 Main',
@@ -72,7 +73,7 @@ class BaseTest(unittest.TestCase):
         id=submission_metadata['id']
 
         # Load the residence listing page
-        resp=self.session.get('http://web/residence')
+        resp=self.session.get('http://localhost.localdomain/residence')
 
         # Check that the new entry is listed
         self.assertIsNotNone(re.search(r'a href="https?://.+/residence/{}/edit"'.format(id),resp.text))
