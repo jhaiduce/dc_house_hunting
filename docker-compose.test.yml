@@ -5,6 +5,23 @@ services:
       - type: bind
         source: ./mysql-config-househunting.cnf
         target: /etc/mysql/conf.d/mysql-config-househunting.cnf
+  nginx:
+    volumes:
+      - type: bind
+        source: ./nginx/househunting.conf
+        target: /etc/nginx/conf.d/househunting.conf
+      - type: bind
+        source: ./nginx/common.conf
+        target: /etc/nginx/common.conf
+      - type: bind
+        source: ./nginx/common_location.conf
+        target: /etc/nginx/conf.d/common_location.conf
+      - type: bind
+        source: ./nginx/ssl.conf
+        target: /etc/nginx/ssl.conf
+      - type: bind
+        source: ./nginx/default.conf
+        target: /etc/nginx/conf.d/default.conf
 secrets:
   storage_key:
     name: storage_key.1
