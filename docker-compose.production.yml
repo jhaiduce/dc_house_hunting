@@ -1,4 +1,8 @@
 version: '3.7'
+services:
+  db:
+    volumes:
+      - mysql-data:/var/lib/mysql
 secrets:
   storage_key:
     name: storage_key.1
