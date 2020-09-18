@@ -18,6 +18,7 @@ COPY MANIFEST.in /app
 COPY CHANGES.txt /app
 COPY README.md /app
 RUN pip3 install --trusted-host pypi.python.org -e .
+COPY check_celery_running.py /app
 
 COPY pyramid_start.sh /app
 
