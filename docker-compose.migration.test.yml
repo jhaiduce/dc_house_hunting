@@ -1,0 +1,4 @@
+version: '3.7'
+services:
+  migration:
+    command: ['/usr/local/bin/initialize_dc_house_hunting_db','--delete-existing','/run/secrets/production.ini']
