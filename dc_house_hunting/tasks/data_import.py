@@ -14,7 +14,7 @@ import requests
 from decimal import Decimal
 import re
 
-def import_brightmls(content,url=None):
+def import_brightmls(content,url=None,dbsession=None):
     
     soup=BeautifulSoup(content,features='lxml')
     
@@ -59,7 +59,7 @@ def import_brightmls(content,url=None):
         except IndexError:
             lotsize=None
 
-        residences.append(Residence(
+        new_residence=Residence(
             location=Location(
                 street_address=address,
                 city=city,
@@ -71,7 +71,17 @@ def import_brightmls(content,url=None):
             area=floorspace,
             lotsize=lotsize,
             price=price,
-            url=url))
+            url=url)
+
+        if dbsession is not None:
+            existing_residences=dbsession.query(Residence
+            ).filter(Residence.location.has(Location.street_address==address)
+            ).filter(Residence.location.has(Location.city==city)
+            ).filter(Residence.location.has(Location.state==state))
+            if existing_residences.count():
+                continue
+
+        residences.append(new_residence)
             
     return residences
 
@@ -94,7 +104,7 @@ def import_from_url(url):
     content=requests.get(url).content
 
     if hostname.endswith('brightmls.com'):
-        objects=import_brightmls(content,url)
+        objects=import_brightmls(content,url,dbsession)
 
     for obj in objects:
         dbsession.add(obj)
