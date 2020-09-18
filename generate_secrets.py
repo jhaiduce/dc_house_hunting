@@ -116,6 +116,7 @@ def generate_secrets(secrets_dir='secrets',ini_template='production.ini.tpl',ini
     pyramid_auth_secret=write_password(secrets_dir+'/pyramid_auth_secret')
     pyramid_session_secret=binascii.hexlify(
         bytes(write_password(secrets_dir+'/pyramid_session_secret',length=32),'ascii'))
+    rabbitmq_password=write_password(secrets_dir+'/rabbitmq_password')
 
     ini_text=open(ini_template).read().format(
         mysql_production_password_encoded=quote_plus(db_app_pw).replace('%','%%'),

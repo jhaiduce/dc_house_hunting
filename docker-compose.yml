@@ -71,6 +71,40 @@ services:
         target: /etc/nginx/dhparams.pem
     links:
       - web
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jhaiduce/househunting
+    deploy:
+      replicas: 2
+      resources:
+        reservations:
+          memory: 600M
+    command: ["/usr/local/bin/celery","-A","dc_house_hunting","worker","--app=dc_house_hunting.celery","--concurrency","1","--loglevel=info"]
+    healthcheck:
+      test: ["CMD","/usr/local/bin/python3","/app/celery_healthcheck.py"]
+    secrets:
+      - source: pyramid_main_ini
+        target: /run/secrets/production.ini
+  rabbitmq:
+    image: rabbitmq
+    deploy:
+      resources:
+        reservations:
+          memory: 200M
+    environment:
+      RABBITMQ_DEFAULT_USER: househunting
+      RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_password
+    secrets:
+      - source: rabbitmq_password
+        target: rabbitmq_password
+  redis:
+    image: redis
+    deploy:
+      resources:
+        reservations:
+          memory: 100M
 volumes:
   mysql-data:
 configs:

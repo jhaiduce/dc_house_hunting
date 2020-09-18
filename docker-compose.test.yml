@@ -50,3 +50,6 @@ secrets:
   ssl_certificate_key:
     name: ssl_certificate_key.1
     file: ./integration_test_secrets/localhost.localdomain.key
+  rabbitmq_password:
+    name: rabbitmq_password.1
+    file: ./integration_test_secrets/rabbitmq_password

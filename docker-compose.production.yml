@@ -32,3 +32,6 @@ secrets:
   ssl_certificate_key:
     name: ssl_certificate_key.1
     file: ./nginx/ssl/privkey.pem
+  rabbitmq_password:
+    name: rabbitmq_password.1
+    file: ./secrets/rabbitmq_password
