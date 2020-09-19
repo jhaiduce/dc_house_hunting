@@ -2,6 +2,8 @@ from pyramid.view import view_config
 import colander
 import deform
 from pyramid.httpexceptions import HTTPFound
+from .residence import ResidenceCRUD
+import json
 
 class ImportForm(colander.MappingSchema):
 
@@ -35,10 +37,16 @@ class ImportViews(object):
                 return dict(form=e.render())
 
             from ..tasks.data_import import import_from_url
-            import_from_url.delay(appstruct['url'])
+            result=import_from_url.delay(appstruct['url'])
 
-            redirect_url=self.request.route_url('home')
+            redirect_url=ResidenceCRUD.routes['list']
 
-            return HTTPFound(redirect_url)
+            return HTTPFound(
+                redirect_url,
+                content_type='application/json',
+                charset='',
+                text=json.dumps(
+                    {'task_id':result.task_id})
+            )
 
         return dict(form=form)
