@@ -85,7 +85,7 @@ def import_brightmls(content,url=None,dbsession=None):
             
     return residences
 
-@celery.task()
+@celery.task(ignore_result=False)
 def import_from_url(url):
 
     from ..celery import session_factory
