@@ -4,7 +4,7 @@ set -e
 
 source "deployment-includes.sh"
 
-numworkers=1
+numworkers=2
 
 DOTAGS=househunting
 
