@@ -25,8 +25,9 @@ if [ $(docker-machine ls -q|grep -c $host_prefix-master) -eq "0" ]; then
 		 $host_prefix-master
   master_ip=$(docker-machine ip $host_prefix-master)
   docker-machine ssh $host_prefix-master docker swarm init --advertise-addr $master_ip
+else
+  master_ip=$(docker-machine ip $host_prefix-master)
 fi
-
 
 for i in $(seq 1 $numworkers); do
     if [ $(docker-machine ls -q|grep -c $host_prefix-$i) -eq "0" ]; then
