@@ -48,17 +48,21 @@ upload_files
 function isSwarmNode(){
     host=$1
     if [ "$(docker-machine ssh $host docker info | grep Swarm | sed 's/ Swarm: //g')" == "active" ]; then
-        true
+        swarm_node=1
     else
-        false
+        swarm_node=0
     fi
 }
 
 for i in $(seq 1 $numworkers); do
     host=$host_prefix-$i
-    swarm_node=(isSwarmNode $host)
-    if [ ! $swarm_node ]; then
-	docker-machine ssh $host_prefix-$i \
+    isSwarmNode $host
+    if [ $swarm_node == 1 ]; then
+        echo "$host_prefix-$i is already a member of the swarm"
+    fi
+    if [ $swarm_node == 0 ]; then
+    echo "Joining node $i to swarm"
+	docker-machine ssh $host \
 		       docker swarm join --token $join_token $master_ip:2377
     fi
 done
