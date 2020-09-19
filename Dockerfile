@@ -10,7 +10,6 @@ RUN apt-get -y install libffi-dev
 COPY requirements.txt /app
 RUN pip3 install --trusted-host pypi.python.org --upgrade pip
 RUN pip3 install -r /app/requirements.txt
-ARG CACHE_DATE=not_a_date3
 COPY dc_house_hunting /app/dc_house_hunting
 COPY setup.py /app
 COPY pytest.ini /app
