@@ -86,7 +86,7 @@ services:
       - source: pyramid_main_ini
         target: /run/secrets/production.ini
   rabbitmq:
-    image: rabbitmq:management
+    image: rabbitmq
     ports:
       - 15672:15672
     deploy:
