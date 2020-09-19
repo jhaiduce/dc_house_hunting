@@ -20,7 +20,7 @@ secrets:
     name: app_admin_password.1
     file: ./secrets/app_admin_pw
   pyramid_main_ini:
-    name: production.ini.2
+    name: production.ini.3
     file: ./secrets/production.ini
   mysql_ca:
     name: mysql_ca.1
