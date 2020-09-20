@@ -166,6 +166,8 @@ class ResidenceCRUD(CRUDView):
     def hoa_fee(obj):
         return dollar_format(obj.hoa_fee)
 
+    hoa_fee.info={'label':'HOA fee'}
+
     list_display=[address,price,hoa_fee,url]
 
     url_path='/residence'
