@@ -181,7 +181,10 @@ class ResidenceCRUD(CRUDView):
         return obj.bedrooms if obj.bedrooms is not None else '-'
 
     def floorspace(obj):
-        return obj.area
+        if obj.area is None:
+            return '-'
+        else:
+            return '{:,}'.format(obj.area)
 
     floorspace.info={'label':'Floor space (sq. ft.)'}
 
