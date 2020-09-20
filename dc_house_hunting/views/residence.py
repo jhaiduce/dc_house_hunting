@@ -158,7 +158,7 @@ class ResidenceCRUD(CRUDView):
         else:
             return '<a href="{url}">{url}</a>'.format(url=escape(obj.url))
 
-    url.info={'safe':True}
+    url.info={'safe':True, 'label':'URL'}
 
     def price(obj):
         return dollar_format(obj.price)
