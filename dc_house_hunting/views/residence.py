@@ -46,6 +46,9 @@ def finalize_residence_fields(event):
         event.obj.parkingtype_id=event.appstruct['parkingtype']
         event.obj.residencetype_id=event.appstruct['residencetype']
 
+def dollar_format(value):
+    return '${:,.2f}'.format(value) if value is not None else '-'
+
 class ResidenceCRUD(CRUDView):
 
     model=Residence
@@ -157,6 +160,12 @@ class ResidenceCRUD(CRUDView):
 
     url.info={'safe':True}
 
-    list_display=[address,url]
+    def price(obj):
+        return dollar_format(obj.price)
+
+    def hoa_fee(obj):
+        return dollar_format(obj.hoa_fee)
+
+    list_display=[address,price,hoa_fee,url]
 
     url_path='/residence'
