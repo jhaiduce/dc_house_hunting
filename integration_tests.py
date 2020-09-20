@@ -5,6 +5,26 @@ import configparser
 import json
 import re
 from bs4 import BeautifulSoup
+from dc_house_hunting.celery import celery
+from celery.result import AsyncResult
+
+def wait_for_celery():
+    from dc_house_hunting import celery
+    while True:
+        try:
+            # Check whether there are celery workers running
+            worker_status = celery.get_celery_worker_status()
+            if worker_status is not None:
+                # There are workers, exit the loop
+                break
+        except IOError:
+            print('Broker not running')
+            log.debug('Broker not running.')
+        else:
+            print('No celery workers running.')
+            log.debug('No celery workers running.')
+
+        sleep(1)
 
 class BaseTest(unittest.TestCase):
 
@@ -85,6 +105,8 @@ class BaseTest(unittest.TestCase):
 
     def test_import(self):
 
+        wait_for_celery()
+
         resp=self.session.post(
             'https://localhost.localdomain/import',
             data={
@@ -98,3 +120,10 @@ class BaseTest(unittest.TestCase):
         except IndexError:
             print(resp.text)
             raise
+
+        task_result=AsyncResult(
+            json.loads(resp.history[0].text)['task_id'],
+            app=celery
+        )
+
+        result=task_result.wait()

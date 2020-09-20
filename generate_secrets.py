@@ -129,6 +129,18 @@ def generate_secrets(secrets_dir='secrets',ini_template='production.ini.tpl',ini
     )
     open(os.path.join(secrets_dir,iniout),'w').write(ini_text)
 
+    ini_text=open('integration_test_client.ini.tpl').read().format(
+        mysql_production_password_encoded=quote_plus(db_app_pw).replace('%','%%'),
+        mysql_production_password=db_app_pw.replace('%','%%'),
+        mysql_root_password_encoded=quote_plus(db_root_pw).replace('%','%%'),
+        app_admin_password=app_admin_pw.replace('%','%%'),
+        pyramid_auth_secret=pyramid_auth_secret.replace('%','%%'),
+        session_secret=pyramid_session_secret.decode('ascii').replace('%','%%'),
+        rabbitmq_password_encoded=quote_plus(rabbitmq_password).replace('%','%%'),
+        hostname=hostname
+    )
+    open(os.path.join(secrets_dir,'integration_test_client.ini'),'w').write(ini_text)
+
 if __name__=='__main__':
     from argparse import ArgumentParser
 

@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.test
     image: househunting_integration_test
     secrets:
-      - source: pyramid_main_ini
+      - source: client_ini
         target: /run/secrets/production.ini
       - source: ssl_certificate
         target: /etc/ssl/localhost.localdomain.crt
