@@ -909,7 +909,7 @@ class CRUDView(object,metaclass=CRUDCreator):
 
             if not info.get('safe',False):
                 from html import escape
-                col_value=escape(col_value)
+                col_value=escape(str(col_value))
 
             yield title, col_value
 
