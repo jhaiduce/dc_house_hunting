@@ -168,6 +168,23 @@ class ResidenceCRUD(CRUDView):
 
     hoa_fee.info={'label':'HOA fee'}
 
-    list_display=[address,price,hoa_fee,url]
+    def bathrooms(obj):
+        if obj.bathrooms:
+            if obj.half_bathrooms is not None and obj.half_bathrooms > 0:
+                return '{}/{}'.format(obj.bathrooms,obj.half_bathrooms)
+            else:
+                return str(obj.bathrooms)
+        else:
+            return '-'
+
+    def bedrooms(obj):
+        return obj.bedrooms if obj.bedrooms is not None else '-'
+
+    def floorspace(obj):
+        return obj.area
+
+    floorspace.info={'label':'Floor space (sq. ft.)'}
+
+    list_display=[address,bedrooms,bathrooms,floorspace,price,hoa_fee,url]
 
     url_path='/residence'
