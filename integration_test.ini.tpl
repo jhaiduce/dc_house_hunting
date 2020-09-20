@@ -98,5 +98,5 @@ use = egg:PasteDeploy#prefix
 scheme=https
 
 [celery]
-backend_url = rpc://rabbitmq
+backend_url = redis://redis
 broker_url = pyamqp://househunting:{rabbitmq_password_encoded}@rabbitmq
