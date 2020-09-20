@@ -81,6 +81,8 @@ class ResidenceCRUD(CRUDView):
             'basement',
             'attic',
             'price',
+            'hoa_fee',
+            'taxes',
             'coop',
             'area',
             'lotsize',
@@ -107,6 +109,12 @@ class ResidenceCRUD(CRUDView):
             },
             'area':{
                 'title':'Floor space (sq. ft.)'
+            },
+            'hoa_fee':{
+                'title':'HOA fee'
+            },
+            'taxes':{
+                'title':'Property tax'
             },
         }
     )
