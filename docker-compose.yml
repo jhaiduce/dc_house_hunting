@@ -78,7 +78,7 @@ services:
       replicas: 2
       resources:
         reservations:
-          memory: 600M
+          memory: 150M
     command: ["/usr/local/bin/celery","-A","dc_house_hunting","worker","--app=dc_house_hunting.celery","--concurrency","1","--loglevel=info"]
     healthcheck:
       test: ["CMD","/usr/local/bin/python3","/app/celery_healthcheck.py"]
@@ -92,7 +92,7 @@ services:
     deploy:
       resources:
         reservations:
-          memory: 200M
+          memory: 100M
     environment:
       RABBITMQ_DEFAULT_USER: househunting
       RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_password

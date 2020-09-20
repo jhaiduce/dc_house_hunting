@@ -38,8 +38,7 @@ class ImportViews(object):
 
             from ..tasks.data_import import import_from_url
             result=import_from_url.delay(appstruct['url'])
-
-            redirect_url=ResidenceCRUD.routes['list']
+            redirect_url=self.request.route_url(ResidenceCRUD.routes['list'])
 
             return HTTPFound(
                 redirect_url,
