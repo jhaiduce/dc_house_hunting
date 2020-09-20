@@ -82,6 +82,8 @@ class ResidenceCRUD(CRUDView):
             'attic',
             'price',
             'coop',
+            'area',
+            'lotsize',
             colander.SchemaNode(
                 colander.Integer(),
                 name='parkingtype',
@@ -99,7 +101,13 @@ class ResidenceCRUD(CRUDView):
             },
             'notes':{
                 'widget':deform.widget.TextAreaWidget()
-            }
+            },
+            'lotsize':{
+                'title':'Lot size (acres)'
+            },
+            'area':{
+                'title':'Floor space (sq. ft.)'
+            },
         }
     )
 
