@@ -89,20 +89,14 @@ class Residence(Base):
     coop=Column(Boolean)
     url=Column(Text)
 
+    score_fields=['bedrooms', 'bathrooms', 'half_bathrooms', 'area']
+
     def get_score(self,session):
         score=0
 
-        if self.bedrooms:
-            score += WeightFactor.get('bedrooms', session) * WeightMapping.get('bedrooms', session)(self.bedrooms)
-
-        if self.bathrooms:
-            score += WeightFactor.get('bathrooms', session) * WeightMapping.get('bathrooms', session)(self.bathrooms)
-
-        if self.half_bathrooms:
-            score += WeightFactor.get('half_bathrooms', session) * WeightMapping.get('half_bathrooms', session)(self.half_bathrooms)
-
-        if self.area:
-            score += WeightFactor.get('floorspace', session) * WeightMapping.get('floorspace', session)(self.area)
+        for field in self.score_fields:
+            if getattr(self,field) is not None:
+                score += WeightFactor.get(field, session) * WeightMapping.get(field, session)(getattr(self,field))
 
         return score
 
