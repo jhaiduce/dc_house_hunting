@@ -21,6 +21,8 @@ from .meta import Base
 
 from datetime import datetime
 
+from sqlalchemy.orm.exc import NoResultFound
+
 class Location(Base):
 
     __tablename__='location'
@@ -140,3 +142,89 @@ class Park(Base):
 
     playground=Column(Boolean)
     trees=Column(Boolean)
+
+class WeightFactor(Base):
+
+    __tablename__='weightfactor'
+
+    __table_args__={'mysql_encrypted':'yes'}
+
+    id = Column(Integer, Sequence('weightfactor_seq'), primary_key=True)
+
+    name = Column(String(255), unique=True, nullable=False)
+    weight = Column(Float, default=1, nullable=False)
+
+    @classmethod
+    def get(cls,name,dbsession):
+        try:
+            return dbsession.query(WeightFactor).filter(WeightFactor.name==name).one()
+        except NoResultFound:
+            # Return a new generic mapping
+            return WeightFactor()
+
+class WeightMapping(Base):
+
+    __tablename__='weightmapping'
+
+    __table_args__={'mysql_encrypted':'yes'}
+
+    id = Column(Integer, Sequence('weightmapping_seq'), primary_key=True)
+
+    name = Column(String(255), unique=True, nullable=False)
+    kind = Column(String(255), nullable=False)
+
+    def __call__(self,x):
+        return x
+
+    __mapper_args__ = {
+        'polymorphic_on': kind,
+        'polymorphic_identity':'weightmapping'
+    }
+
+    @classmethod
+    def get(cls,name,dbsession):
+        try:
+            return dbsession.query(WeightMapping).filter(WeightMapping.name==name).one()
+        except NoResultFound:
+            # Return a new generic mapping
+            return WeightMapping()
+
+class FactorMapping(WeightMapping):
+
+    __tablename__='factormapping'
+
+    id = Column(
+            Integer,
+            ForeignKey('weightmapping.id'),
+            primary_key=True)
+
+    factor = Column(Float, default=1, nullable=False)
+
+    def __call__(self,x):
+        return x*self.factor
+
+    __mapper_args__ = {
+        'polymorphic_identity':'factormapping'
+    }
+
+class SmootherstepMapping(WeightMapping):
+
+    __tablename__='smoothstepmapping'
+
+    id = Column(
+            Integer,
+            ForeignKey('weightmapping.id'),
+            primary_key=True)
+
+    lower = Column(Float, default=0, nullable=False)
+    upper = Column(Float, default=0, nullable=False)
+
+    def __call__(self,x):
+        x = max(self.lower,min(x,self.upper))
+        x = (x-self.lower)/(self.upper-self.lower)
+        y = x**3. * (6. * x**2. - 15. * x + 10.)
+        return y
+
+    __mapper_args__ = {
+        'polymorphic_identity':'smoothstepmapping'
+    }
