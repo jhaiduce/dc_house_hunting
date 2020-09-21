@@ -49,7 +49,64 @@ def finalize_residence_fields(event):
 def dollar_format(value):
     return '${:,.2f}'.format(value) if value is not None else '-'
 
+def address(obj):
+    from html import escape
+    return '{address}, {city}, {state}'.format(
+        address = escape(obj.location.street_address),
+        city=escape(obj.location.city),
+        state=escape(obj.location.state),
+    ) if obj.location else None
+
+def url(obj):
+    from html import escape
+
+    try:
+        url=escape(obj.url)
+    except AttributeError:
+        return ''
+    else:
+        return '<a href="{url}">{url}</a>'.format(url=escape(obj.url))
+
+url.info={'safe':True, 'label':'URL'}
+
+def price(obj):
+    return dollar_format(obj.price)
+
+def hoa_fee(obj):
+    return dollar_format(obj.hoa_fee)
+
+hoa_fee.info={'label':'HOA fee'}
+
+def bathrooms(obj):
+    if obj.bathrooms:
+        if obj.half_bathrooms is not None and obj.half_bathrooms > 0:
+            return '{}/{}'.format(obj.bathrooms,obj.half_bathrooms)
+        else:
+            return str(obj.bathrooms)
+    else:
+        return '-'
+
+def bedrooms(obj):
+    return obj.bedrooms if obj.bedrooms is not None else '-'
+
+def floorspace(obj):
+    if obj.area is None:
+        return '-'
+    else:
+        return '{:,}'.format(obj.area)
+
+floorspace.info={'label':'Floor space (sq. ft.)'}
+
 class ResidenceCRUD(CRUDView):
+
+    def __init__(self,request):
+
+        super(ResidenceCRUD,self).__init__(request)
+
+        self.__class__.list_display=[address, self.score, bedrooms, bathrooms, floorspace, price, hoa_fee, url]
+
+    def score(self,obj):
+        return obj.get_score(self.dbsession)
 
     model=Residence
     schema=SQLAlchemySchemaNode(
@@ -139,55 +196,5 @@ class ResidenceCRUD(CRUDView):
         appstruct['parkingtype']=obj.parkingtype_id
 
         return appstruct
-
-    def address(obj):
-        from html import escape
-        return '{address}, {city}, {state}'.format(
-            address = escape(obj.location.street_address),
-            city=escape(obj.location.city),
-            state=escape(obj.location.state),
-        ) if obj.location else None
-
-    def url(obj):
-        from html import escape
-
-        try:
-            url=escape(obj.url)
-        except AttributeError:
-            return ''
-        else:
-            return '<a href="{url}">{url}</a>'.format(url=escape(obj.url))
-
-    url.info={'safe':True, 'label':'URL'}
-
-    def price(obj):
-        return dollar_format(obj.price)
-
-    def hoa_fee(obj):
-        return dollar_format(obj.hoa_fee)
-
-    hoa_fee.info={'label':'HOA fee'}
-
-    def bathrooms(obj):
-        if obj.bathrooms:
-            if obj.half_bathrooms is not None and obj.half_bathrooms > 0:
-                return '{}/{}'.format(obj.bathrooms,obj.half_bathrooms)
-            else:
-                return str(obj.bathrooms)
-        else:
-            return '-'
-
-    def bedrooms(obj):
-        return obj.bedrooms if obj.bedrooms is not None else '-'
-
-    def floorspace(obj):
-        if obj.area is None:
-            return '-'
-        else:
-            return '{:,}'.format(obj.area)
-
-    floorspace.info={'label':'Floor space (sq. ft.)'}
-
-    list_display=[address,bedrooms,bathrooms,floorspace,price,hoa_fee,url]
 
     url_path='/residence'
