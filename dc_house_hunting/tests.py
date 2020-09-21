@@ -30,6 +30,8 @@ class BaseTest(unittest.TestCase):
         self.engine = get_engine(settings)
         session_factory = get_session_factory(self.engine)
 
+        self.init_database()
+
         self.session = get_tm_session(session_factory, transaction.manager)
 
     def init_database(self):
@@ -47,8 +49,6 @@ class TestCRUD(BaseTest):
 
     def setUp(self):
         super(TestCRUD, self).setUp()
-
-        self.init_database()
 
         from .models.housing_search_models import ResidenceType
         from .models.housing_search_models import ParkingType
@@ -94,7 +94,6 @@ class AuthenticationTests(BaseTest):
 
     def setUp(self):
         super(AuthenticationTests, self).setUp()
-        self.init_database()
 
         from .models import User
 
