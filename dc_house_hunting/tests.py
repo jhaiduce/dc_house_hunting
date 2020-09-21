@@ -90,6 +90,24 @@ class TestCRUD(BaseTest):
         self.assertEqual(residence.location.postal_code,'12345')
         self.assertEqual(residence.location.street_address,'123 Main')
 
+class ScoreTests(BaseTest):
+
+    def test_get_score(self):
+
+        from .models import Residence, Location
+
+        residence=Residence(
+            location=Location(
+                street_address='123 1st St',
+                city='Washington',
+                state='DC'
+            ),
+            bedrooms=1,
+        )
+
+        score=residence.get_score(self.session)
+        self.assertEqual(score,1)
+
 class AuthenticationTests(BaseTest):
 
     def setUp(self):

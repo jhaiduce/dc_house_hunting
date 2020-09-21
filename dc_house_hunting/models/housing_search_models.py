@@ -89,6 +89,23 @@ class Residence(Base):
     coop=Column(Boolean)
     url=Column(Text)
 
+    def get_score(self,session):
+        score=0
+
+        if self.bedrooms:
+            score += WeightFactor.get('bedrooms', session) * WeightMapping.get('bedrooms', session)(self.bedrooms)
+
+        if self.bathrooms:
+            score += WeightFactor.get('bathrooms', session) * WeightMapping.get('bathrooms', session)(self.bathrooms)
+
+        if self.half_bathrooms:
+            score += WeightFactor.get('half_bathrooms', session) * WeightMapping.get('half_bathrooms', session)(self.half_bathrooms)
+
+        if self.area:
+            score += WeightFactor.get('floorspace', session) * WeightMapping.get('floorspace', session)(self.area)
+
+        return score
+
 class School(Base):
 
     __tablename__='school'
@@ -149,10 +166,18 @@ class WeightFactor(Base):
 
     __table_args__={'mysql_encrypted':'yes'}
 
+    def __init__(self, **kwargs):
+        if 'weight' not in kwargs:
+             kwargs['weight'] = 1
+        super(WeightFactor, self).__init__(**kwargs)
+
     id = Column(Integer, Sequence('weightfactor_seq'), primary_key=True)
 
     name = Column(String(255), unique=True, nullable=False)
     weight = Column(Float, default=1, nullable=False)
+
+    def __mul__(self,other):
+        return self.weight*other
 
     @classmethod
     def get(cls,name,dbsession):
