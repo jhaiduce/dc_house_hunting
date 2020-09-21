@@ -91,12 +91,15 @@ class Residence(Base):
 
     score_fields=['bedrooms', 'bathrooms', 'half_bathrooms', 'area']
 
+    def get_score_component(self,field,session):
+        return WeightFactor.get(field, session) * WeightMapping.get(field, session)(getattr(self,field))
+
     def get_score(self,session):
         score=0
 
         for field in self.score_fields:
             if getattr(self,field) is not None:
-                score += WeightFactor.get(field, session) * WeightMapping.get(field, session)(getattr(self,field))
+                score += self.get_score_component(field, session)
 
         return score
 
