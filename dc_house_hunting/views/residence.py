@@ -190,4 +190,9 @@ class ResidenceCRUD(CRUDView):
 
         return appstruct
 
+    def get_list_query(self):
+        query=super(ResidenceCRUD,self).get_list_query()
+
+        return query.order_by(Residence.score.desc())
+
     url_path='/residence'
