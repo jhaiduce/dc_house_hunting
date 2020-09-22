@@ -108,6 +108,49 @@ class ScoreTests(BaseTest):
         score=residence.get_score(self.session)
         self.assertEqual(score,1)
 
+    def test_edit_weights(self):
+
+        from .models import Residence, WeightFactor, WeightMapping
+        from .views.score_weights import ScoreWeightViews
+
+        reqdata={
+            'submit':'submit',
+            'bedrooms':{
+                'weight':'1',
+                'mapping':{'lower':'0','upper':'5'}
+            },
+            'bathrooms':{
+                'weight':'1',
+                'mapping':{'lower':'0','upper':'2'}
+            },
+            'half_bathrooms':{
+                'weight':'1',
+                'mapping':{'lower':'0','upper':'2'}
+            },
+            'half_bathrooms':{
+                'weight':'1',
+                'mapping':{'lower':'0','upper':'2'}
+            },
+            'area':{
+                'weight':'1',
+                'mapping':{'lower':'1000','upper':'2000'}
+            },
+        }
+
+        request=testing.DummyRequest(
+            params=reqdata, dbsession=self.session)
+
+        views=ScoreWeightViews(request)
+
+        resp=views.edit_weights()
+
+        self.assertEqual(resp.status_code,302)
+
+        self.assertAlmostEqual(
+            WeightFactor.get('bedrooms', self.session).weight, 1)
+        self.assertAlmostEqual(
+            WeightMapping.get('area', self.session).upper,2000)
+
 class AuthenticationTests(BaseTest):
 
     def setUp(self):
