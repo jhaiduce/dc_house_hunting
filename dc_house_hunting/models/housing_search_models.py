@@ -190,9 +190,10 @@ class WeightFactor(Base):
         return self.weight*other
 
     @classmethod
-    def get(cls,name,dbsession):
+    def get(cls,name,session):
         try:
-            return dbsession.query(WeightFactor).filter(WeightFactor.name==name).one()
+            return session.query(WeightFactor).filter(
+                    WeightFactor.name==name).one()
         except NoResultFound:
             # Return a new generic mapping
             return cls(name=name)
@@ -217,9 +218,9 @@ class WeightMapping(Base):
     }
 
     @classmethod
-    def get(cls,name,dbsession):
+    def get(cls,name,session):
         try:
-            return dbsession.query(WeightMapping).filter(WeightMapping.name==name).one()
+            return session.query(WeightMapping).filter(WeightMapping.name==name).one()
         except NoResultFound:
             # Return a new generic mapping
             return cls(name=name)
