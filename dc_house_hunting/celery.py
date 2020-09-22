@@ -70,12 +70,12 @@ def get_celery_worker_status():
 try:
     backend=config['celery']['backend_url']
 except KeyError:
-    backend='rpc://cycling_test_rabbitmq'
+    backend='rpc://'
 
 try:
     broker=config['celery']['broker_url']
 except KeyError:
-    broker='pyamqp://guest@rabbitmq'
+    broker='memory://localhost/'
 
 celery=Celery(backend=backend, broker=broker)
 celery.config_from_object('dc_house_hunting.celeryconfig')
