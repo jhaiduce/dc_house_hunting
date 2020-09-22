@@ -182,7 +182,7 @@ class WeightFactor(Base):
             return dbsession.query(WeightFactor).filter(WeightFactor.name==name).one()
         except NoResultFound:
             # Return a new generic mapping
-            return WeightFactor()
+            return cls(name=name)
 
 class WeightMapping(Base):
 
@@ -209,7 +209,7 @@ class WeightMapping(Base):
             return dbsession.query(WeightMapping).filter(WeightMapping.name==name).one()
         except NoResultFound:
             # Return a new generic mapping
-            return WeightMapping()
+            return cls(name=name)
 
 class FactorMapping(WeightMapping):
 
