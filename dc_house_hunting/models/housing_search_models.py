@@ -213,6 +213,11 @@ class WeightMapping(Base):
 
 class FactorMapping(WeightMapping):
 
+    def __init__(self, **kwargs):
+        if 'factor' not in kwargs:
+             kwargs['factor'] = 1
+        super(FactorMapping, self).__init__(**kwargs)
+
     __tablename__='factormapping'
 
     id = Column(
@@ -230,6 +235,13 @@ class FactorMapping(WeightMapping):
     }
 
 class SmootherstepMapping(WeightMapping):
+
+    def __init__(self,**kwargs):
+        if 'lower' not in kwargs:
+             kwargs['lower'] = 0
+        if 'upper' not in kwargs:
+             kwargs['upper'] = 0
+        super(SmootherstepMapping, self).__init__(**kwargs)
 
     __tablename__='smoothstepmapping'
 
