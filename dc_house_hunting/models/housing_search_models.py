@@ -16,6 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm.session import object_session
 
 from .meta import Base
 
@@ -88,20 +89,32 @@ class Residence(Base):
     air_drying_clothes=Column(Boolean)
     coop=Column(Boolean)
     url=Column(Text)
+    score_=Column(Float)
 
     score_fields=['bedrooms', 'bathrooms', 'half_bathrooms', 'area']
 
-    def get_score_component(self,field,session):
-        return WeightFactor.get(field, session) * WeightMapping.get(field, session)(getattr(self,field))
+    def get_score_component(self,field,session=None):
+        if session is None:
+            session=object_session(self)
+        return WeightFactor.get(field,session) * WeightMapping.get(field,session)(getattr(self,field))
 
-    def get_score(self,session):
+    def compute_score(self):
         score=0
 
         for field in self.score_fields:
             if getattr(self,field) is not None:
-                score += self.get_score_component(field, session)
+                score += self.get_score_component(field)
+
+        self.score_ = score
 
         return score
+
+    @property
+    def score(self):
+        if self.score_ is None:
+            self.score_=self.compute_score()
+
+        return self.score_
 
 class School(Base):
 

@@ -99,14 +99,7 @@ floorspace.info={'label':'Floor space (sq. ft.)'}
 
 class ResidenceCRUD(CRUDView):
 
-    def __init__(self,request):
-
-        super(ResidenceCRUD,self).__init__(request)
-
-        self.__class__.list_display=[address, self.score, bedrooms, bathrooms, floorspace, price, hoa_fee, url]
-
-    def score(self,obj):
-        return obj.get_score(self.dbsession)
+    list_display=[address, 'score', bedrooms, bathrooms, floorspace, price, hoa_fee, url]
 
     model=Residence
     schema=SQLAlchemySchemaNode(

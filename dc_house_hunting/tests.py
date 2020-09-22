@@ -105,8 +105,9 @@ class ScoreTests(BaseTest):
             bedrooms=1,
         )
 
-        score=residence.get_score(self.session)
-        self.assertEqual(score,1)
+        self.session.add(residence)
+
+        self.assertEqual(residence.score,1)
 
     def test_edit_weights(self):
 
