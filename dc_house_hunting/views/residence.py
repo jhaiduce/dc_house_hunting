@@ -46,6 +46,12 @@ def finalize_residence_fields(event):
         event.obj.parkingtype_id=event.appstruct['parkingtype']
         event.obj.residencetype_id=event.appstruct['residencetype']
 
+def sort_label(field,label=None):
+
+    if label is None: label=field.replace("_", " ").title()
+
+    return '<a href="?sort={}">{}</a>'.format(field,label)
+
 def dollar_format(value):
     return '${:,.2f}'.format(value) if value is not None else '-'
 
@@ -89,17 +95,30 @@ def bathrooms(obj):
 def bedrooms(obj):
     return obj.bedrooms if obj.bedrooms is not None else '-'
 
-def floorspace(obj):
+def area(obj):
     if obj.area is None:
         return '-'
     else:
         return '{:,}'.format(obj.area)
 
-floorspace.info={'label':'Floor space (sq. ft.)'}
+area.info={'label':'Floor space (sq. ft.)'}
+
+def score(obj):
+    return '{:0.2f}'.format(obj.score) if obj.score is not None else '-'
+
+sort_columns=[ 'address','score','bedrooms','bathrooms',
+    'area','price','hoa_fee','url']
+
+for name in sort_columns:
+    getter=locals()[name]
+    info=getattr(getter,'info',{})
+    print('{} {}'.format(name,info.get('label',name)))
+    info['label']=sort_label(name,info.get('label',None))
+    getter.info=info
 
 class ResidenceCRUD(CRUDView):
 
-    list_display=[address, 'score', bedrooms, bathrooms, floorspace, price, hoa_fee, url]
+    list_display=[address, score, bedrooms, bathrooms, area, price, hoa_fee, url]
 
     model=Residence
     schema=SQLAlchemySchemaNode(
@@ -193,6 +212,13 @@ class ResidenceCRUD(CRUDView):
     def get_list_query(self):
         query=super(ResidenceCRUD,self).get_list_query()
 
-        return query.order_by(Residence.score.desc())
+        sort_name=self.request.params.get('sort','score')
+
+        if sort_name not in sort_columns:
+            sort_name='score'
+
+        sort_column=getattr(Residence,sort_name).desc()
+
+        return query.order_by(sort_column)
 
     url_path='/residence'
