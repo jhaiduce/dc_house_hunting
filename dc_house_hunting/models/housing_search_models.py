@@ -109,11 +109,15 @@ class Residence(Base):
 
         return score
 
-    @property
+    @hybrid_property
     def score(self):
         if self.score_ is None:
             self.score_=self.compute_score()
 
+        return self.score_
+
+    @score.expression
+    def score(self):
         return self.score_
 
 class School(Base):
