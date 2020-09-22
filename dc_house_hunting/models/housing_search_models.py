@@ -239,7 +239,7 @@ class SmootherstepMapping(WeightMapping):
             primary_key=True)
 
     lower = Column(Float, default=0, nullable=False)
-    upper = Column(Float, default=0, nullable=False)
+    upper = Column(Float, default=1, nullable=False)
 
     def __call__(self,x):
         x = max(self.lower,min(x,self.upper))

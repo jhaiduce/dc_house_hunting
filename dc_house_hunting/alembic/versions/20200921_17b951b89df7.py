@@ -41,7 +41,7 @@ def upgrade():
     op.create_table('smoothstepmapping',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('lower', sa.Float(), default=0, nullable=False),
-    sa.Column('upper', sa.Float(), default=0, nullable=False),
+    sa.Column('upper', sa.Float(), default=1, nullable=False),
     sa.ForeignKeyConstraint(['id'], ['weightmapping.id'], name=op.f('fk_smoothstepmapping_id_weightmapping')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_smoothstepmapping'))
     )
