@@ -148,9 +148,9 @@ class ScoreTests(BaseTest):
         self.assertEqual(resp.status_code,302)
 
         self.assertAlmostEqual(
-            WeightFactor.get('bedrooms', self.session).weight, 1)
+            WeightFactor.get('bedrooms',self.session).weight, 1)
         self.assertAlmostEqual(
-            WeightMapping.get('area', self.session).upper,2000)
+            WeightMapping.get('area',self.session).upper,2000)
 
 class AuthenticationTests(BaseTest):
 

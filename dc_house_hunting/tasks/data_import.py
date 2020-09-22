@@ -90,17 +90,17 @@ def import_from_url(url):
 
     from ..celery import session_factory
     from ..models import get_tm_session
-    
+
     dbsession=get_tm_session(session_factory, transaction.manager)
-    
+
     logger.debug('Received import task for URL {}'.format(url))
 
     from urllib.parse import urlparse
-    
+
     parsed_url=urlparse(url)
-    
+
     hostname=parsed_url.hostname
-    
+
     content=requests.get(url).content
 
     if hostname.endswith('brightmls.com'):
