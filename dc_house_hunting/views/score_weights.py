@@ -69,10 +69,17 @@ class ScoreWeightViews(object):
                 dbsession.add(weightfactor)
                 dbsession.add(weightmapping)
 
+            from ..tasks.scores import update_scores
+            result=update_scores.delay()
+
             redirect_url = self.request.route_url(ResidenceCRUD.routes['list'])
 
             return HTTPFound(
-                redirect_url
+                redirect_url,
+                content_type='application/json',
+                charset='',
+                text=json.dumps(
+                    {'task_id':result.task_id})
             )
     
         form=self.weight_form.render(
