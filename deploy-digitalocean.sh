@@ -70,11 +70,11 @@ done
 # Deploy the stack
 docker-machine ssh $host_prefix-master docker stack deploy -c docker-compose.yml -c docker-compose.production.yml househunting
 
-# Update images
-update_images
-
 # Update the database
 docker-machine ssh $host_prefix-master docker stack deploy -c docker-compose.yml -c docker-compose.production.yml -c docker-compose.migrate.yml househunting
+
+# Update images
+update_images
 
 function wait_for_migration {
 
