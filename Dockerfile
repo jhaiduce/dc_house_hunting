@@ -33,6 +33,10 @@ RUN apt-get -y install libcap2-bin
 
 RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/python3.8
 
+RUN apt-get -y install curl
+
 USER appuser
 
 CMD ["/app/pyramid_start.sh"]
+
+HEALTHCHECK CMD curl --fail http://localhost/login || exit 1
