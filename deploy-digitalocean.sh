@@ -73,9 +73,6 @@ docker-machine ssh $host_prefix-master docker stack deploy -c docker-compose.yml
 # Update the database
 docker-machine ssh $host_prefix-master docker stack deploy -c docker-compose.yml -c docker-compose.production.yml -c docker-compose.migrate.yml househunting
 
-# Update images
-update_images
-
 function wait_for_migration {
 
     while [ 1 ]; do
@@ -99,3 +96,6 @@ docker-machine ssh $host_prefix-master docker service logs househunting_migratio
 
 # Delete the migration service
 docker-machine ssh $host_prefix-master docker service rm househunting_migration
+
+# Update images
+update_images
