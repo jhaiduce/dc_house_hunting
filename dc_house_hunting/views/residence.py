@@ -188,6 +188,7 @@ class ResidenceCRUD(CRUDView):
             'attic',
             'price',
             'hoa_fee',
+            'insurance',
             'taxes',
             'insurance',
             'coop',
