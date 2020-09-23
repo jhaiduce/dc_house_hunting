@@ -46,11 +46,21 @@ def finalize_residence_fields(event):
         event.obj.parkingtype_id=event.appstruct['parkingtype']
         event.obj.residencetype_id=event.appstruct['residencetype']
 
-def sort_label(field,label=None):
+def sort_label(field,label=None,current_order='desc',current_field=None):
+
+    if current_field==field:
+        # Reverse sort order
+        if current_order=='desc':
+            order='asc'
+        elif current_order=='asc':
+            order='desc'
+    else:
+        order='desc'
 
     if label is None: label=field.replace("_", " ").title()
 
-    return '<a href="?sort={}">{}</a>'.format(field,label)
+    return '<a href="?sort={}&order={}">{}</a>'.format(
+        field,order,label)
 
 def dollar_format(value):
     return '${:,.2f}'.format(value) if value is not None else '-'
@@ -73,7 +83,7 @@ def url(obj):
     else:
         return '<a href="{url}">{url}</a>'.format(url=escape(obj.url))
 
-url.info={'safe':True, 'label':'URL'}
+url.info={'safe':True, 'basic_label':'URL'}
 
 def price(obj):
     return dollar_format(obj.price)
@@ -81,7 +91,7 @@ def price(obj):
 def hoa_fee(obj):
     return dollar_format(obj.hoa_fee)
 
-hoa_fee.info={'label':'HOA fee'}
+hoa_fee.info={'basic_label':'HOA fee'}
 
 def bathrooms(obj):
     if obj.bathrooms:
@@ -101,22 +111,49 @@ def area(obj):
     else:
         return '{:,}'.format(obj.area)
 
-area.info={'label':'Floor space (sq. ft.)'}
+area.info={'basic_label':'Floor space (sq. ft.)'}
 
 def score(obj):
     return '{:0.2f}'.format(obj.score) if obj.score is not None else '-'
 
+def dictify(self,obj):
+    """
+    Serialize a Residence object to a dict for CRUD view
+    """
+
+    appstruct=super(ResidenceCRUD,self).dictify(obj)
+
+    if obj.location is not None:
+        appstruct['address']=obj.location.street_address
+        appstruct['city']=obj.location.city
+        appstruct['state']=obj.location.state
+        appstruct['zip']=obj.location.postal_code
+
+    appstruct['residencetype']=obj.residencetype_id
+    appstruct['parkingtype']=obj.parkingtype_id
+
+    return appstruct
+
 sort_columns=[ 'address','score','bedrooms','bathrooms',
     'area','price','hoa_fee','url']
 
-for name in sort_columns:
-    getter=locals()[name]
-    info=getattr(getter,'info',{})
-    print('{} {}'.format(name,info.get('label',name)))
-    info['label']=sort_label(name,info.get('label',None))
-    getter.info=info
-
 class ResidenceCRUD(CRUDView):
+
+    def __init__(self, request):
+
+        super(ResidenceCRUD,self).__init__(request)
+
+        for name in sort_columns:
+            getter=globals()[name]
+            info=getattr(getter,'info',{})
+            info['basic_label']=info.get('basic_label',None)
+            if not hasattr(getter,'sort_label_applied'):
+                info['label']=sort_label(
+                    name,info.get('basic_label',None),
+                    request.params.get('order','desc'),
+                    request.params.get('sort',None))
+            getter.info=info
+            getter.request=request
 
     list_display=[address, score, bedrooms, bathrooms, area, price, hoa_fee, url]
 
@@ -191,34 +228,21 @@ class ResidenceCRUD(CRUDView):
         }
     )
 
-    def dictify(self,obj):
-        """
-        Serialize a Residence object to a dict for CRUD view
-        """
-
-        appstruct=super(ResidenceCRUD,self).dictify(obj)
-
-        if obj.location is not None:
-            appstruct['address']=obj.location.street_address
-            appstruct['city']=obj.location.city
-            appstruct['state']=obj.location.state
-            appstruct['zip']=obj.location.postal_code
-
-        appstruct['residencetype']=obj.residencetype_id
-        appstruct['parkingtype']=obj.parkingtype_id
-
-        return appstruct
 
     def get_list_query(self):
         query=super(ResidenceCRUD,self).get_list_query()
 
-        sort_name=self.request.params.get('sort','score')
+        sort_field=self.request.params.get('sort','score')
+        order=self.request.params.get('order','desc')
 
-        if sort_name not in sort_columns:
-            sort_name='score'
+        if sort_field not in sort_columns:
+            sort_field='score'
 
-        sort_column=getattr(Residence,sort_name).desc()
+        sort=getattr(Residence,sort_field)
 
-        return query.order_by(sort_column)
+        if order=='desc':
+            sort=sort.desc()
+
+        return query.order_by(sort)
 
     url_path='/residence'
