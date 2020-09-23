@@ -8,7 +8,7 @@ import transaction
 logger = get_task_logger(__name__)
 
 @celery.task(ignore_result=False)
-def update_scores():
+def update_scores(residence_ids=None):
 
     from ..celery import session_factory
     from ..models import get_tm_session
@@ -17,7 +17,23 @@ def update_scores():
 
     logger.debug('Received update_scores task')
 
-    for residence in dbsession.query(Residence):
-        residence.compute_score()
+    if residence_ids is None:
+
+        for residence in dbsession.query(Residence):
+            residence.compute_score()
+
+    else:
+
+        try:
+            len(residence_ids)
+        except TypeError:
+            residence_ids=[residence_ids]
+
+        for residence_id in residence_ids:
+
+            residence=dbsession.query(
+                Residence(id=residence_id)).one()
+
+            residence.compute_score()
 
     transaction.commit()

@@ -46,6 +46,9 @@ def finalize_residence_fields(event):
         event.obj.parkingtype_id=event.appstruct['parkingtype']
         event.obj.residencetype_id=event.appstruct['residencetype']
 
+    from ..tasks.scores import update_scores
+    result=update_scores.delay(event.obj.id)
+
 def sort_label(field,label=None,current_order='desc',current_field=None):
 
     if current_field==field:
