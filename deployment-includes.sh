@@ -5,5 +5,6 @@ function upload_files {
 }
 
 function update_images {
+    docker-machine ssh $host_prefix-master docker service update --image jhaiduce/househunting househunting_worker
     docker-machine ssh $host_prefix-master docker service update --image jhaiduce/househunting househunting_web
 }
