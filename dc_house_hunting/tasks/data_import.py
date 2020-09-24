@@ -106,6 +106,10 @@ def import_from_url(url):
     if hostname.endswith('brightmls.com'):
         objects=import_brightmls(content,url,dbsession)
 
+    from .scores import update_scores
+
+    update_scores.delay([obj.id for obj in objects if isinstance(obj,Residence)])
+
     for obj in objects:
         dbsession.add(obj)
 
