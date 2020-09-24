@@ -153,6 +153,8 @@ class ResidenceCRUD(CRUDView):
         Residence,
         includes=[
             'url',
+            'rejected',
+            'withdrawn',
             colander.SchemaNode(
                 colander.String(),
                 name='address'),

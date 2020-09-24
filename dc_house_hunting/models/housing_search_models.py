@@ -223,6 +223,8 @@ class Residence(Base):
     coop=Column(Boolean)
     url=Column(Text)
     score_=Column(Float)
+    rejected=Column(Boolean,default=False)
+    withdrawn=Column(Boolean,default=False)
 
     score_fields=['bedrooms', 'bathrooms', 'half_bathrooms', 'area', 'kitchen_score', 'bike_storage_score','parkingtype_id']
     score_field_labels={
