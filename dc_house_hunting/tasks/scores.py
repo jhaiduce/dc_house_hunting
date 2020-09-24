@@ -32,7 +32,7 @@ def update_scores(residence_ids=None):
         for residence_id in residence_ids:
 
             residence=dbsession.query(
-                Residence(id=residence_id)).one()
+                Residence).filter(Residence.id==residence_id).one()
 
             residence.compute_score()
 
