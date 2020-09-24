@@ -7,7 +7,7 @@ import deform
 
 def submit_update_score_task(success,residence_id):
     from ..tasks.scores import update_scores
-    result=update_scores.delay(event.obj.id)
+    result=update_scores.delay(residence_id)
 
 @colander.deferred
 def get_parkingtype_widget(node,kw):
