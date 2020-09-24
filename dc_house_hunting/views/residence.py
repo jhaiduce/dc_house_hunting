@@ -119,24 +119,6 @@ area.info={'basic_label':'Floor space (sq. ft.)'}
 def score(obj):
     return '{:0.2f}'.format(obj.score) if obj.score is not None else '-'
 
-def dictify(self,obj):
-    """
-    Serialize a Residence object to a dict for CRUD view
-    """
-
-    appstruct=super(ResidenceCRUD,self).dictify(obj)
-
-    if obj.location is not None:
-        appstruct['address']=obj.location.street_address
-        appstruct['city']=obj.location.city
-        appstruct['state']=obj.location.state
-        appstruct['zip']=obj.location.postal_code
-
-    appstruct['residencetype']=obj.residencetype_id
-    appstruct['parkingtype']=obj.parkingtype_id
-
-    return appstruct
-
 sort_columns=[ 'address','score','bedrooms','bathrooms',
     'area','price','hoa_fee','url']
 
@@ -231,6 +213,23 @@ class ResidenceCRUD(CRUDView):
         }
     )
 
+    def dictify(self,obj):
+        """
+        Serialize a Residence object to a dict for CRUD view
+        """
+
+        appstruct=super(ResidenceCRUD,self).dictify(obj)
+
+        if obj.location is not None:
+            appstruct['address']=obj.location.street_address
+            appstruct['city']=obj.location.city
+            appstruct['state']=obj.location.state
+            appstruct['zip']=obj.location.postal_code
+
+        appstruct['residencetype']=obj.residencetype_id
+        appstruct['parkingtype']=obj.parkingtype_id
+
+        return appstruct
 
     def get_list_query(self):
         query=super(ResidenceCRUD,self).get_list_query()
