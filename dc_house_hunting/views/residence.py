@@ -5,6 +5,10 @@ from colanderalchemy import SQLAlchemySchemaNode
 import colander
 import deform
 
+def submit_update_score_task(success,residence_id):
+    from ..tasks.scores import update_scores
+    result=update_scores.delay(event.obj.id)
+
 @colander.deferred
 def get_parkingtype_widget(node,kw):
     from ..models import ParkingType
@@ -46,8 +50,10 @@ def finalize_residence_fields(event):
         event.obj.parkingtype_id=event.appstruct['parkingtype']
         event.obj.residencetype_id=event.appstruct['residencetype']
 
-    from ..tasks.scores import update_scores
-    result=update_scores.delay(event.obj.id)
+    event.request.dbsession.flush()
+
+    event.request.tm.get().addAfterCommitHook(
+        submit_update_score_task,args=[event.obj.id])
 
 def sort_label(field,label=None,current_order='desc',current_field=None):
 

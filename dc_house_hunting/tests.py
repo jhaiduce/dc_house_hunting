@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock
 
 from pyramid import testing
 
@@ -75,6 +76,8 @@ class TestCRUD(BaseTest):
             'notes':'',
             'price':''
         },dbsession=self.session)
+
+        request.tm=Mock()
 
         views=ResidenceCRUD(request)
 
