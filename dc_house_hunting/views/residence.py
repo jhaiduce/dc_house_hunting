@@ -4,6 +4,7 @@ from ..models import Residence
 from colanderalchemy import SQLAlchemySchemaNode
 import colander
 import deform
+from sqlalchemy import or_
 
 def submit_update_score_task(success,residence_id):
     from ..tasks.scores import update_scores
@@ -243,6 +244,12 @@ class ResidenceCRUD(CRUDView):
 
     def get_list_query(self):
         query=super(ResidenceCRUD,self).get_list_query()
+
+        query=query.filter(
+            or_(Residence.rejected!=True, Residence.rejected==None)
+        ).filter(
+            or_(Residence.withdrawn!=True, Residence.rejected==None)
+        )
 
         sort_field=self.request.params.get('sort','score')
         order=self.request.params.get('order','desc')
