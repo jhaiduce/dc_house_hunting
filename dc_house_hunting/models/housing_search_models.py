@@ -122,6 +122,11 @@ class SmootherstepMapping(WeightMapping):
     upper = Column(Float, default=1, nullable=False)
 
     def __call__(self,x):
+        if self.lower==self.upper:
+            if x>self.upper:
+                return 1
+            else:
+                return 0
         x = max(self.lower,min(x,self.upper))
         x = (x-self.lower)/(self.upper-self.lower)
         y = x**3. * (6. * x**2. - 15. * x + 10.)
