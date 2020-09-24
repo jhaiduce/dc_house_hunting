@@ -7,9 +7,9 @@ class ParkingTypeCRUD(CRUDView):
     model=ParkingType
     schema=SQLAlchemySchemaNode(
         ParkingType,
-        includes=['name']
+        includes=['name','score']
     )
 
-    list_display=['name']
+    list_display=['name','score']
 
     url_path='/parkingtype'

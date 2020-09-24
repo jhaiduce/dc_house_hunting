@@ -180,6 +180,8 @@ class ResidenceCRUD(CRUDView):
             'coop',
             'area',
             'lotsize',
+            'kitchen_score',
+            'bike_storage_score',
             colander.SchemaNode(
                 colander.Integer(),
                 name='parkingtype',

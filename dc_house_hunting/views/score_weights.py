@@ -17,7 +17,21 @@ class FieldWeightSchema(colander.MappingSchema):
 weight_schema=colander.SchemaNode(colander.Mapping())
 
 for field in Residence.score_fields:
-    weight_schema.add(FieldWeightSchema(name=field))
+    fieldmapping=colander.SchemaNode(
+        colander.Mapping(),
+        name=field,
+        label=Residence.score_field_labels.get(field,field)
+    )
+    MappingType=Residence.score_mapping_types.get(
+        field, SmootherstepMapping)
+    print(field,MappingType,issubclass(MappingType,SmootherstepMapping))
+    if issubclass(MappingType,SmootherstepMapping):
+        print('Adding mapping')
+        fieldmapping.add(
+            SmoothstepMapping(name='mapping')
+        )
+    fieldmapping.add(colander.SchemaNode(colander.Float(),name='weight'))
+    weight_schema.add(fieldmapping)
 
 def get_appstruct(dbsession):
 
@@ -27,9 +41,12 @@ def get_appstruct(dbsession):
         appstruct[field]={'mapping':{}}
         weightfactor = WeightFactor.get(field, dbsession)
         appstruct[field]['weight'] = weightfactor.weight
-        weightmapping = SmootherstepMapping.get(field, dbsession)
-        appstruct[field]['mapping']['lower'] = weightmapping.lower
-        appstruct[field]['mapping']['upper'] = weightmapping.upper
+        MappingType=Residence.score_mapping_types.get(
+            field,SmootherstepMapping)
+        weightmapping = MappingType.get(field, dbsession)
+        if isinstance(weightmapping,SmootherstepMapping):
+            appstruct[field]['mapping']['lower'] = weightmapping.lower
+            appstruct[field]['mapping']['upper'] = weightmapping.upper
 
     return appstruct    
 
@@ -63,11 +80,14 @@ class ScoreWeightViews(object):
             for field in Residence.score_fields:
                 weightfactor = WeightFactor.get(field, dbsession)
                 weightfactor.weight=appstruct[field]['weight']
-                weightmapping = SmootherstepMapping.get(field, dbsession)
-                weightmapping.lower=appstruct[field]['mapping']['lower']
-                weightmapping.upper=appstruct[field]['mapping']['upper']
                 dbsession.add(weightfactor)
-                dbsession.add(weightmapping)
+                MappingType=Residence.score_mapping_types.get(
+                    field,SmootherstepMapping)
+                weightmapping = MappingType.get(field, dbsession)
+                if isinstance(weightmapping,SmootherstepMapping):
+                    weightmapping.lower=appstruct[field]['mapping']['lower']
+                    weightmapping.upper=appstruct[field]['mapping']['upper']
+                    dbsession.add(weightmapping)
 
             from ..tasks.scores import update_scores
             result=update_scores.delay()
