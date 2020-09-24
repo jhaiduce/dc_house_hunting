@@ -91,7 +91,9 @@ def import_from_url(url):
     from ..celery import session_factory
     from ..models import get_tm_session
 
-    dbsession=get_tm_session(session_factory, transaction.manager)
+    tm=transaction.manager
+
+    dbsession=get_tm_session(session_factory, tm)
 
     logger.debug('Received import task for URL {}'.format(url))
 
@@ -106,11 +108,17 @@ def import_from_url(url):
     if hostname.endswith('brightmls.com'):
         objects=import_brightmls(content,url,dbsession)
 
-    from .scores import update_scores
-
-    update_scores.delay([obj.id for obj in objects if isinstance(obj,Residence)])
-
     for obj in objects:
         dbsession.add(obj)
+
+    def submit_update_score_task(success,residence_ids):
+        from .scores import update_scores
+        result=update_scores.delay(residence_ids)
+
+    dbsession.flush()
+
+    tm.get().addAfterCommitHook(
+        submit_update_score_task,
+        args=[[obj.id for obj in objects if isinstance(obj,Residence)]])
 
     transaction.commit()
