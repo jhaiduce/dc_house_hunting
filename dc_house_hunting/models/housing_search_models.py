@@ -108,7 +108,7 @@ class SmootherstepMapping(WeightMapping):
         if 'lower' not in kwargs:
              kwargs['lower'] = 0
         if 'upper' not in kwargs:
-             kwargs['upper'] = 0
+             kwargs['upper'] = 1
         super(SmootherstepMapping, self).__init__(**kwargs)
 
     __tablename__='smoothstepmapping'
