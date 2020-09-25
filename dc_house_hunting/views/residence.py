@@ -189,6 +189,7 @@ class ResidenceCRUD(CRUDView):
             'price',
             'hoa_fee',
             'taxes',
+            'insurance',
             'coop',
             'area',
             'lotsize',
