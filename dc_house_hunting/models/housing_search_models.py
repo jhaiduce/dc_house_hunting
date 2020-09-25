@@ -328,8 +328,8 @@ class Residence(Base):
 
     @hybrid_property
     def monthly_cost(self):
-        return self.mortgage+self.taxes/12+self.insurance/12
-        return self.mortgage+self.taxes/int(12)+self.insurance/int(12)
+        hoa_fee = self.hoa_fee if self.hoa_fee else 0
+        return self.mortgage+self.taxes/int(12)+self.insurance/int(12) + hoa_fee
 
 class School(Base):
 
