@@ -152,6 +152,10 @@ class ScoreTests(BaseTest):
                 'weight':'1',
                 'mapping':{'lower':'1000','upper':'2000'}
             },
+            'monthly_cost':{
+                'weight':'1',
+                'mapping':{'lower':'4100','upper':'2000'}
+            },
             'kitchen_score':{'weight':'1'},
             'bike_storage_score':{'weight':'1'},
             'parkingtype_id':{'weight':'1'},

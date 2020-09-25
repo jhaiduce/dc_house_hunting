@@ -239,11 +239,12 @@ class Residence(Base):
     rejected=Column(Boolean,default=False)
     withdrawn=Column(Boolean,default=False)
 
-    score_fields=['bedrooms', 'bathrooms', 'half_bathrooms', 'area', 'kitchen_score', 'bike_storage_score','parkingtype_id']
+    score_fields=['bedrooms', 'bathrooms', 'half_bathrooms', 'area', 'kitchen_score', 'bike_storage_score','parkingtype_id','monthly_cost']
     score_field_labels={
         'parkingtype_id':'parking',
         'kitchen_score':'kitchen',
-        'bike_storage':'bike storage'
+        'bike_storage':'bike storage',
+        'monthly_cost':'monthly cost'
     }
 
     score_mapping_types={
@@ -255,7 +256,7 @@ class Residence(Base):
     def get_score_component(self,field,session=None):
         if session is None:
             session=object_session(self)
-        return WeightFactor.get(field,session) * WeightMapping.get(field,session)(getattr(self,field))
+        return WeightFactor.get(field,session) * WeightMapping.get(field,session)(float(getattr(self,field)))
 
     def compute_score(self):
         score=0
