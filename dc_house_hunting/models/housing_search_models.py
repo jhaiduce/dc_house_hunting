@@ -10,7 +10,8 @@ from sqlalchemy import (
     Sequence,
     Date,
     Boolean,
-    Numeric
+    Numeric,
+    func,
 )
 
 from decimal import Decimal
@@ -338,6 +339,10 @@ class Residence(Base):
         if self.mortgage is None: return None
         hoa_fee = self.hoa_fee if self.hoa_fee else 0
         return self.mortgage+self.taxes/int(12)+self.insurance/int(12) + hoa_fee
+
+    @monthly_cost.expression
+    def monthly_cost(self):
+        return self.mortgage+self.taxes/int(12)+self.insurance/int(12) + func.IF(self.hoa_fee!=None,self.hoa_fee,0)
 
 class School(Base):
 
