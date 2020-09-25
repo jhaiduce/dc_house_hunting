@@ -13,6 +13,8 @@ from sqlalchemy import (
     Numeric
 )
 
+from decimal import Decimal
+
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from sqlalchemy.orm import relationship
@@ -285,8 +287,8 @@ class Residence(Base):
         return self.price-self.loan_amount
 
     def update_mortgage(self):
-        rate=2.5/100
-        years=30
+        rate=Decimal(0.025)
+        years=int(30)
         self.mortgage_ = mortgage_payment(self.loan_amount,rate,years)
 
     @hybrid_property
@@ -303,7 +305,7 @@ class Residence(Base):
         if self.taxes is not None:
             self.taxes_computed = self.taxes
         else:
-            tax_rate=0.85/100
+            tax_rate=Decimal(0.0085)
             self.taxes_computed=self.price*tax_rate
 
     @hybrid_property
@@ -325,6 +327,7 @@ class Residence(Base):
     @hybrid_property
     def monthly_cost(self):
         return self.mortgage+self.taxes/12+self.insurance/12
+        return self.mortgage+self.taxes/int(12)+self.insurance/int(12)
 
 class School(Base):
 
