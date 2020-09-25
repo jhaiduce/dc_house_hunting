@@ -130,7 +130,10 @@ class SmootherstepMapping(WeightMapping):
                 return 1
             else:
                 return 0
-        x = max(self.lower,min(x,self.upper))
+        if self.upper > self.lower:
+            x = max(self.lower,min(x,self.upper))
+        else:
+            x = max(self.upper,min(x,self.lower))
         x = (x-self.lower)/(self.upper-self.lower)
         y = x**3. * (6. * x**2. - 15. * x + 10.)
         return y
