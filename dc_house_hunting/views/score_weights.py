@@ -24,9 +24,7 @@ for field in Residence.score_fields:
     )
     MappingType=Residence.score_mapping_types.get(
         field, SmootherstepMapping)
-    print(field,MappingType,issubclass(MappingType,SmootherstepMapping))
     if issubclass(MappingType,SmootherstepMapping):
-        print('Adding mapping')
         fieldmapping.add(
             SmoothstepMapping(name='mapping')
         )
