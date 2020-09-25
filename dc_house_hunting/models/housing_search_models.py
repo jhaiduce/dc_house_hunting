@@ -142,7 +142,7 @@ def mortgage_payment(principal, rate, years):
     num_payments=years*12
     monthly_rate=rate/12
     payment = (principal * monthly_rate) / \
-        (1-(1+monthly_rate)**num_payments)
+        (1-(1+monthly_rate)**(-num_payments))
     return payment
 
 class Location(Base):
