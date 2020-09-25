@@ -280,6 +280,7 @@ class Residence(Base):
 
     @hybrid_property
     def loan_amount(self):
+        if self.price is None: return None
         return min(self.price, 778900)
 
     @hybrid_property
@@ -289,7 +290,10 @@ class Residence(Base):
     def update_mortgage(self):
         rate=Decimal(0.025)
         years=int(30)
-        self.mortgage_ = mortgage_payment(self.loan_amount,rate,years)
+        if self.loan_amount is None:
+            self.mortgage_=None
+        else:
+            self.mortgage_ = mortgage_payment(self.loan_amount,rate,years)
 
     @hybrid_property
     def mortgage(self):
@@ -305,8 +309,11 @@ class Residence(Base):
         if self.taxes_ is not None:
             self.taxes_computed = self.taxes_
         else:
-            tax_rate=Decimal(0.0085)
-            self.taxes_computed=self.price*tax_rate
+            if self.price is None:
+                self.taxes_computed=None
+            else:
+                tax_rate=Decimal(0.0085)
+                self.taxes_computed=self.price*tax_rate
 
     @hybrid_property
     def taxes(self):
@@ -328,6 +335,7 @@ class Residence(Base):
 
     @hybrid_property
     def monthly_cost(self):
+        if self.mortgage is None: return None
         hoa_fee = self.hoa_fee if self.hoa_fee else 0
         return self.mortgage+self.taxes/int(12)+self.insurance/int(12) + hoa_fee
 
