@@ -11,7 +11,7 @@ from sqlalchemy import (
     Date,
     Boolean,
     Numeric,
-    func,
+    case,
 )
 
 from decimal import Decimal
@@ -306,26 +306,33 @@ class Residence(Base):
     def mortgage(self):
         return self.mortgage_
 
-    def update_taxes(self):
-        if self.taxes_ is not None:
-            self.taxes_computed = self.taxes_
-        else:
-            if self.price is None:
-                self.taxes_computed=None
-            else:
-                tax_rate=Decimal(0.0085)
-                self.taxes_computed=self.price*tax_rate
-
     @hybrid_property
     def taxes(self):
-        if self.taxes_computed is None:
-            self.update_taxes()
+        if self.taxes_ is not None:
+            return self.taxes_
+        else:
+            if self.price is None:
+                taxes=None
+            else:
+                tax_rate=Decimal(0.0085)
+                taxes=self.price*tax_rate
 
-        return self.taxes_computed
+        return taxes
 
     @taxes.expression
     def taxes(self):
-        return self.taxes_computed
+        tax_rate=Decimal(0.0085)
+        return case(
+            [
+                (self.taxes_!=None, self.taxes_),
+            ],
+            else_ = case(
+                [
+                    (self.price!=None, self.price*tax_rate),
+                ],
+                else_ = None
+            )
+        )
 
     @hybrid_property
     def insurance(self):
@@ -333,6 +340,13 @@ class Residence(Base):
             return self.insurance_
         else:
             return Decimal(1500)
+
+    @insurance.expression
+    def insurance(self):
+        return case(
+            [
+                (self.insurance_ == None, 0),
+            ], else_ = self.insurance_)
 
     @hybrid_property
     def monthly_cost(self):
@@ -342,7 +356,14 @@ class Residence(Base):
 
     @monthly_cost.expression
     def monthly_cost(self):
-        return self.mortgage+self.taxes/int(12)+self.insurance/int(12) + func.IF(self.hoa_fee!=None,self.hoa_fee,0)
+        hoa_fee = case(
+            [
+                (self.hoa_fee == None, 0),
+            ],
+            else_=self.hoa_fee
+        )
+
+        return self.mortgage+self.taxes/int(12)+self.insurance/int(12) + hoa_fee
 
 class School(Base):
 
