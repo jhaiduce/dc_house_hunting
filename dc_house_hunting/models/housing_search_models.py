@@ -223,7 +223,7 @@ class Residence(Base):
     taxes_=Column('taxes',Numeric)
     taxes_computed=Column(Numeric)
     mortgage_=Column('mortgage',Numeric)
-    insurace_=Column('insurance',Numeric)
+    insurance_=Column('insurance',Numeric)
     notes=Column(Text)
     bicycle_storage=Column(Boolean)
     interracial_neighborhood=Column(Boolean)
@@ -302,8 +302,8 @@ class Residence(Base):
         return self.mortgage_
 
     def update_taxes(self):
-        if self.taxes is not None:
-            self.taxes_computed = self.taxes
+        if self.taxes_ is not None:
+            self.taxes_computed = self.taxes_
         else:
             tax_rate=Decimal(0.0085)
             self.taxes_computed=self.price*tax_rate
