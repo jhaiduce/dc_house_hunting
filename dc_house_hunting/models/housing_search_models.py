@@ -323,6 +323,8 @@ class Residence(Base):
     def insurance(self):
         if self.insurance_ is not None:
             return self.insurance_
+        else:
+            return Decimal(1500)
 
     @hybrid_property
     def monthly_cost(self):
