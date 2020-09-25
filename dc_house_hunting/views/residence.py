@@ -200,9 +200,8 @@ class ResidenceCRUD(CRUDView):
             'attic',
             'price',
             'hoa_fee',
-            'insurance',
+            'insurance_',
             'taxes',
-            'insurance',
             'coop',
             'area',
             'lotsize',
@@ -237,6 +236,9 @@ class ResidenceCRUD(CRUDView):
             },
             'taxes':{
                 'title':'Property tax'
+            },
+            'insurance_':{
+                'title':'Insurance'
             },
         }
     )
