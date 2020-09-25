@@ -98,6 +98,9 @@ url.info={'safe':True, 'basic_label':'URL'}
 def price(obj):
     return dollar_format(obj.price)
 
+def monthly_cost(obj):
+    return dollar_format(obj.monthly_cost)
+
 def hoa_fee(obj):
     return dollar_format(obj.hoa_fee)
 
@@ -127,7 +130,7 @@ def score(obj):
     return '{:0.2f}'.format(obj.score) if obj.score is not None else '-'
 
 sort_columns=[ 'address','score','bedrooms','bathrooms',
-    'area','price','hoa_fee','url']
+    'area','price','hoa_fee','url','monthly_cost']
 
 class ResidenceCRUD(CRUDView):
 
@@ -147,7 +150,7 @@ class ResidenceCRUD(CRUDView):
             getter.info=info
             getter.request=request
 
-    list_display=[address, score, bedrooms, bathrooms, area, price, hoa_fee, url]
+    list_display=[address, score, bedrooms, bathrooms, area, price, hoa_fee,monthly_cost, url]
 
     model=Residence
     schema=SQLAlchemySchemaNode(
