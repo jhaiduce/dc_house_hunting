@@ -7,9 +7,10 @@ import transaction
 
 import json
 
+from decimal import Decimal
+
 def dummy_request(dbsession):
     return testing.DummyRequest(dbsession=dbsession)
-
 
 class BaseTest(unittest.TestCase):
     def setUp(self):
@@ -92,6 +93,18 @@ class TestCRUD(BaseTest):
         self.assertEqual(residence.residencetype_id,1)
         self.assertEqual(residence.location.postal_code,'12345')
         self.assertEqual(residence.location.street_address,'123 Main')
+        self.assertIsNone(residence.monthly_cost)
+
+        residence.price=Decimal(800000)
+
+        self.assertAlmostEqual(float(residence.monthly_cost),3769.26,2)
+
+        request=testing.DummyRequest(dbsession=self.session)
+        views=ResidenceCRUD(request)
+        resp=views.list()
+
+        # Check that the new entry is listed
+        self.assertIn(residence,resp['items'])
 
 class ScoreTests(BaseTest):
 
