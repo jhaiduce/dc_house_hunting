@@ -108,6 +108,17 @@ class TestCRUD(BaseTest):
 
 class ScoreTests(BaseTest):
 
+    def test_smoothstep_mapping(self):
+
+        from .models import SmootherstepMapping
+
+        self.assertAlmostEqual(SmootherstepMapping(lower=0,upper=1)(0.5),0.5)
+        self.assertAlmostEqual(SmootherstepMapping(lower=0,upper=1)(1.5),1)
+        self.assertAlmostEqual(SmootherstepMapping(lower=0,upper=1)(-0.5),0)
+        self.assertAlmostEqual(SmootherstepMapping(lower=1,upper=0)(0.5),0.5)
+        self.assertAlmostEqual(SmootherstepMapping(lower=1,upper=0)(1.5),0)
+        self.assertAlmostEqual(SmootherstepMapping(lower=1,upper=0)(-0.5),1)
+
     def test_get_score(self):
 
         from .models import Residence, Location
