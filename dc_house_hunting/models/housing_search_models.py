@@ -136,6 +136,13 @@ class SmootherstepMapping(WeightMapping):
         'polymorphic_identity':'smoothstepmapping'
     }
 
+def mortgage_payment(principal, rate, years):
+    num_payments=years*12
+    monthly_rate=rate/12
+    payment = (principal * monthly_rate) / \
+        (1-(1+monthly_rate)**num_payments)
+    return payment
+
 class Location(Base):
 
     __tablename__='location'
@@ -211,7 +218,10 @@ class Residence(Base):
     attic=Column(Boolean)
     price=Column(Numeric)
     hoa_fee=Column(Numeric)
-    taxes=Column(Numeric)
+    taxes_=Column('taxes',Numeric)
+    taxes_computed=Column(Numeric)
+    mortgage_=Column('mortgage',Numeric)
+    insurace_=Column('insurance',Numeric)
     notes=Column(Text)
     bicycle_storage=Column(Boolean)
     interracial_neighborhood=Column(Boolean)
@@ -265,6 +275,56 @@ class Residence(Base):
     @score.expression
     def score(self):
         return self.score_
+
+    @hybrid_property
+    def loan_amount(self):
+        return min(self.price, 778900)
+
+    @hybrid_property
+    def downpayment(self):
+        return self.price-self.loan_amount
+
+    def update_mortgage(self):
+        rate=2.5/100
+        years=30
+        self.mortgage_ = mortgage_payment(self.loan_amount,rate,years)
+
+    @hybrid_property
+    def mortgage(self):
+        if self.mortgage_ is None:
+            self.update_mortgage()
+        return self.mortgage_
+
+    @mortgage.expression
+    def mortgage(self):
+        return self.mortgage_
+
+    def update_taxes(self):
+        if self.taxes is not None:
+            self.taxes_computed = self.taxes
+        else:
+            tax_rate=0.85/100
+            self.taxes_computed=self.price*tax_rate
+
+    @hybrid_property
+    def taxes(self):
+        if self.taxes_computed is None:
+            self.update_taxes()
+
+        return self.taxes_computed
+
+    @taxes.expression
+    def taxes(self):
+        return self.taxes_computed
+
+    @hybrid_property
+    def insurance(self):
+        if self.insurance_ is not None:
+            return self.insurance_
+
+    @hybrid_property
+    def monthly_cost(self):
+        return self.mortgage+self.taxes/12+self.insurance/12
 
 class School(Base):
 
