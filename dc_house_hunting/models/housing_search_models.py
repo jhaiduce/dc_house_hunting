@@ -239,6 +239,7 @@ class Residence(Base):
     coop=Column(Boolean)
     url=Column(Text)
     score_=Column(Float)
+    seen=Column(Boolean,default=False)
     rejected=Column(Boolean,default=False)
     withdrawn=Column(Boolean,default=False)
 

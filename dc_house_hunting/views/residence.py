@@ -129,7 +129,18 @@ area.info={'basic_label':'Floor space (sq. ft.)'}
 def score(obj):
     return '{:0.2f}'.format(obj.score) if obj.score is not None else '-'
 
-sort_columns=[ 'address','score','bedrooms','bathrooms',
+def yesno(value):
+    if value is None:
+        return '-'
+    elif value:
+        return 'y'
+    else:
+        return 'n'
+
+def seen(obj):
+    return yesno(obj.seen)
+
+sort_columns=[ 'seen','address','score','bedrooms','bathrooms',
     'area','price','hoa_fee','url','monthly_cost']
 
 class ResidenceCRUD(CRUDView):
@@ -150,13 +161,14 @@ class ResidenceCRUD(CRUDView):
             getter.info=info
             getter.request=request
 
-    list_display=[address, score, bedrooms, bathrooms, area, price, hoa_fee,monthly_cost, url]
+    list_display=[seen, address, score, bedrooms, bathrooms, area, price, hoa_fee,monthly_cost, url]
 
     model=Residence
     schema=SQLAlchemySchemaNode(
         Residence,
         includes=[
             'url',
+            'seen',
             'rejected',
             'withdrawn',
             colander.SchemaNode(
