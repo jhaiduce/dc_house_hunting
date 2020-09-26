@@ -82,7 +82,9 @@ function wait_for_migration {
 	echo 'Migration' $desired_state $current_state
 
 	if [ $desired_state = 'Shutdown' ]; then
-	    return 0
+	    migration_container=$(docker-machine ssh $host_prefix-master docker service ps --format '{{.ID}}' househunting_migration)
+	    migration_status=$(docker-machine ssh $host_prefix-master docker inspect --format '{{.Status.ContainerStatus.ExitCode}}' $migration_container)
+	    return
 	fi
 
 	sleep 1
@@ -93,6 +95,10 @@ function wait_for_migration {
 wait_for_migration
 
 docker-machine ssh $host_prefix-master docker service logs househunting_migration
+
+if [ $migration_status -ne 0 ]; then
+    exit 1;
+fi
 
 # Delete the migration service
 docker-machine ssh $host_prefix-master docker service rm househunting_migration
