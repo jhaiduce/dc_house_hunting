@@ -197,6 +197,12 @@ class ParkingTypeMapping(WeightMapping):
         'polymorphic_identity':'idmapping'
     }
 
+class ListingState(Base):
+    __tablename__='listingstate'
+
+    id = Column(Integer, Sequence('listingstate_seq'), primary_key=True)
+    name=Column(String(255))
+
 class Residence(Base):
 
     __tablename__='residence'
@@ -213,6 +219,11 @@ class Residence(Base):
     parkingtype_id=Column(
         Integer,ForeignKey('parkingtype.id'))
     parkingtype=relationship(ParkingType,foreign_keys=parkingtype_id)
+
+    listingstate_id=Column(
+        Integer,ForeignKey('listingstate.id'))
+    listingstate=relationship(ListingState,foreign_keys=listingstate_id)
+
     bedrooms=Column(Integer)
     bathrooms=Column(Integer)
     half_bathrooms=Column(Integer)

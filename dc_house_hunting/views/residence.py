@@ -1,10 +1,10 @@
 from pyramid.events import subscriber
 from .crud import CRUDView, ViewDbInsertEvent,ViewDbUpdateEvent
-from ..models import Residence
+from ..models import Residence, ListingState
 from colanderalchemy import SQLAlchemySchemaNode
 import colander
 import deform
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 def submit_update_score_task(success,residence_id):
     from ..tasks.scores import update_scores
@@ -16,6 +16,14 @@ def get_parkingtype_widget(node,kw):
     dbsession=kw['request'].dbsession
     parkingtypes=dbsession.query(ParkingType)
     choices=[('','')]+[(parkingtype.id, parkingtype.name) for parkingtype in parkingtypes]
+    return deform.widget.SelectWidget(values=choices)
+
+@colander.deferred
+def get_listingstate_widget(node,kw):
+    from ..models import ListingState
+    dbsession=kw['request'].dbsession
+    listingstates=dbsession.query(ListingState)
+    choices=[('','')]+[(listingstate.id, listingstate.name) for listingstate in listingstates]
     return deform.widget.SelectWidget(values=choices)
 
 @colander.deferred
@@ -50,8 +58,17 @@ def finalize_residence_fields(event):
 
         event.obj.parkingtype_id=event.appstruct['parkingtype']
         event.obj.residencetype_id=event.appstruct['residencetype']
+        event.obj.listingstate_id=event.appstruct['listingstate']
 
     event.request.dbsession.flush()
+
+    if event.obj.listingstate is not None:
+        if event.obj.listingstate.name=='Withdrawn':
+            event.obj.withdrawn=True
+        else:
+            event.obj.withdrawn=False
+    else:
+        event.obj.withdrawn=None
 
     event.request.tm.get().addAfterCommitHook(
         submit_update_score_task,args=[event.obj.id])
@@ -170,7 +187,13 @@ class ResidenceCRUD(CRUDView):
             'url',
             'seen',
             'rejected',
-            'withdrawn',
+            colander.SchemaNode(
+                colander.Integer(),
+                name='listingstate',
+                title='Listing state',
+                widget=get_listingstate_widget,
+                missing=None
+            ),
             colander.SchemaNode(
                 colander.String(),
                 name='address'),
@@ -258,6 +281,7 @@ class ResidenceCRUD(CRUDView):
 
         appstruct['residencetype']=obj.residencetype_id
         appstruct['parkingtype']=obj.parkingtype_id
+        appstruct['listingstate']=obj.listingstate_id
 
         return appstruct
 
@@ -266,8 +290,26 @@ class ResidenceCRUD(CRUDView):
 
         query=query.filter(
             or_(Residence.rejected!=True, Residence.rejected==None)
+        ).outerjoin(
+            Residence.listingstate
         ).filter(
-            or_(Residence.withdrawn!=True, Residence.rejected==None)
+            and_(
+
+                # Filter out withdrawn and closed listings
+                or_(
+                    and_(
+                        ListingState.name!='Withdrawn',
+                        ListingState.name!='Closed',
+                    ),
+                    Residence.listingstate_id==None,
+                ),
+
+                # Filter out rejected listings
+                or_(
+                    Residence.rejected==False,
+                    Residence.rejected==None
+                )
+            )
         )
 
         sort_field=self.request.params.get('sort','score')
