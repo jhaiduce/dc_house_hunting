@@ -46,13 +46,18 @@ def import_brightmls(content,url=None,dbsession=None):
             row1_divs[3].div.div.span.contents[0])
        
         numbers_row=row1_divs[3]
-        bathroom_str=numbers_row.findChildren('span')[2].contents[0]
-        bathroom_arr=[int(i) for i in bathroom_str.split('/')]
-        bathrooms=bathroom_arr[0]
-        if len(bathroom_arr)>1:
-            halfbaths=bathroom_arr[1]
+        bathrooms_span=bathroom_str=numbers_row.findChildren('span')[2]
+        if len(bathrooms_span.contents)>0:
+            bathroom_str=numbers_row.findChildren('span')[2].contents[0]
+            bathroom_arr=[int(i) for i in bathroom_str.split('/')]
+            bathrooms=bathroom_arr[0]
+            if len(bathroom_arr)>1:
+                halfbaths=bathroom_arr[1]
+            else:
+                halfbaths=0
         else:
-            halfbaths=0
+            bathrooms=None
+            halfbaths=None
         floorspace=float(numbers_row.findChildren('span')[4].contents[0].replace(',',''))
         try:
             lotsize=float(numbers_row.findChildren('span')[6].contents[0].replace(',',''))
