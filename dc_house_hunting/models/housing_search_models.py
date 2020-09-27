@@ -252,7 +252,6 @@ class Residence(Base):
     score_=Column(Float)
     seen=Column(Boolean,default=False)
     rejected=Column(Boolean,default=False)
-    withdrawn=Column(Boolean,default=False)
 
     score_fields=['bedrooms', 'bathrooms', 'half_bathrooms', 'area', 'kitchen_score', 'bike_storage_score','parkingtype_id','monthly_cost']
     score_field_labels={

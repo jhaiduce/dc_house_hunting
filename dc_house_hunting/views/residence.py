@@ -62,14 +62,6 @@ def finalize_residence_fields(event):
 
     event.request.dbsession.flush()
 
-    if event.obj.listingstate is not None:
-        if event.obj.listingstate.name=='Withdrawn':
-            event.obj.withdrawn=True
-        else:
-            event.obj.withdrawn=False
-    else:
-        event.obj.withdrawn=None
-
     event.request.tm.get().addAfterCommitHook(
         submit_update_score_task,args=[event.obj.id])
 
