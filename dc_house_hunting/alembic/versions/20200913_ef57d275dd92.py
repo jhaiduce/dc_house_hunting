@@ -64,6 +64,19 @@ def upgrade():
     mysql_encrypted='yes'
     )
 
+    parkingtype=sa.table(
+        'parkingtype',
+        sa.column('name',sa.String)
+    )
+
+    conn=op.get_bind()
+    result = conn.execute(parkingtype.insert().values(name='Street'))
+    result = conn.execute(parkingtype.insert().values(name='Private garage'))
+    result = conn.execute(parkingtype.insert().values(name='Shared garage'))
+    result = conn.execute(parkingtype.insert().values(name='Driveway'))
+    result = conn.execute(parkingtype.insert().values(name='Uncovered parking lot'))
+    result = conn.execute(parkingtype.insert().values(name='Carport'))
+
 def downgrade():
     op.drop_table('school')
     op.drop_table('residence')
