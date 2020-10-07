@@ -103,7 +103,7 @@ class BaseTest(unittest.TestCase):
         # Check that the new entry is listed
         self.assertIsNotNone(re.search(r'a href="https?://.+/residence/{}/edit"'.format(id),resp.text))
 
-    def test_import(self):
+    def test_import_brightmls(self):
 
         wait_for_celery()
 
@@ -113,6 +113,31 @@ class BaseTest(unittest.TestCase):
             'submit':'submit',
             'url':'https://matrix.brightmls.com/Matrix/Public/Portal.aspx?ID=16150598256',
         })
+
+        # Check that we got redirected
+        try:
+            self.assertEqual(resp.history[0].status_code,302)
+        except IndexError:
+            print(resp.text)
+            raise
+
+        task_result=AsyncResult(
+            json.loads(resp.history[0].text)['task_id'],
+            app=celery
+        )
+
+        result=task_result.wait()
+
+    def test_import_realtor_com(self):
+
+        wait_for_celery()
+
+        resp=self.session.post(
+            'https://localhost.localdomain/import',
+            data={
+                'submit':'submit',
+                'url':'https://www.realtor.com/realestateandhomes-detail/2508-36th-Pl-SE_Washington_DC_20020_M61723-48772',
+            })
 
         # Check that we got redirected
         try:
