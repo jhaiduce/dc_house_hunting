@@ -229,3 +229,27 @@ class DataImportTests(BaseTest):
         self.assertEqual(residence.location.street_address,'2508 36th Pl SE')
         self.assertEqual(residence.listingstate.name,'Active')
         self.assertEqual(residence.parking.name,'Private garage')
+
+    def test_import_view(self):
+        from .views.data_import import ImportViews
+        from cgi import FieldStorage
+
+        request=testing.DummyRequest(post={
+            'submit':'submit',
+            'url':'https://www.realtor.com/realestateandhomes-detail/2508-36th-Pl-SE_Washington_DC_20020_M61723-48772',
+            'upload':{'fh':open('realtor_com_detail_test.html')}
+        },dbsession=self.session)
+
+        views=ImportViews(request)
+
+        resp=views.import_residences()
+
+        request=testing.DummyRequest(post={
+            'submit':'submit',
+            'url':'https://www.realtor.com/realestateandhomes-detail/2508-36th-Pl-SE_Washington_DC_20020_M61723-48772',
+            'content':open('realtor_com_detail_test.html').read()
+        },dbsession=self.session)
+
+        views=ImportViews(request)
+
+        resp=views.import_residences()

@@ -137,6 +137,31 @@ class BaseTest(unittest.TestCase):
             data={
                 'submit':'submit',
                 'url':'https://www.realtor.com/realestateandhomes-detail/2508-36th-Pl-SE_Washington_DC_20020_M61723-48772',
+                'content':open('realtor_com_detail_test.html').read()
+            })
+
+        # Check that we got redirected
+        try:
+            self.assertEqual(resp.history[0].status_code,302)
+        except IndexError:
+            print(resp.text)
+            raise
+
+        task_result=AsyncResult(
+            json.loads(resp.history[0].text)['task_id'],
+            app=celery
+        )
+
+        result=task_result.wait()
+
+        resp=self.session.post(
+            'https://localhost.localdomain/import',
+            data={
+                'submit':'submit',
+                'url':'https://www.realtor.com/realestateandhomes-detail/2508-36th-Pl-SE_Washington_DC_20020_M61723-48772',
+            },
+            files={
+                'upload':open('realtor_com_detail_test.html')
             })
 
         # Check that we got redirected

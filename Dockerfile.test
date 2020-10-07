@@ -11,6 +11,7 @@ COPY requirements.test.txt /test
 RUN pip3 install -r /test/requirements.test.txt
 
 COPY integration_tests.py /test
+COPY realtor_com_detail_test.html /test
 
 ENV NAME World
 

@@ -147,7 +147,7 @@ def import_brightmls(content,url=None,dbsession=None):
     return residences
 
 @celery.task(ignore_result=False)
-def import_from_url(url):
+def import_from_url(url,content=None):
 
     from ..celery import session_factory
     from ..models import get_tm_session
@@ -164,7 +164,8 @@ def import_from_url(url):
 
     hostname=parsed_url.hostname
 
-    content=requests.get(url).content
+    if content is None:
+        content=requests.get(url).content
 
     if hostname.endswith('brightmls.com'):
         objects=import_brightmls(content,url,dbsession)

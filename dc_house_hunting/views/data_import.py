@@ -5,9 +5,26 @@ from pyramid.httpexceptions import HTTPFound
 from .residence import ResidenceCRUD
 import json
 
+class MemoryTmpStore(dict):
+    """ Instances of this class implement the
+    :class:`deform.interfaces.FileUploadTempStore` interface"""
+
+    def preview_url(self, uid):
+        return None
+
+@colander.deferred
+def get_file_upload_widget(node, kw):
+    return deform.widget.FileUploadWidget(kw['tmpstore'])
+
 class ImportForm(colander.MappingSchema):
 
     url=colander.SchemaNode(colander.String())
+    content=colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextAreaWidget(), missing=None)
+    upload=colander.SchemaNode(
+        deform.FileData(),
+        widget=get_file_upload_widget, missing=None)
 
 class ImportViews(object):
 
@@ -15,10 +32,16 @@ class ImportViews(object):
         self.request=request
 
     @property
+    def tmpstore(self):
+        return MemoryTmpStore()
+
+    @property
     def import_form(self):
 
         schema=ImportForm().bind(
-            request=self.request)
+            request=self.request,
+            tmpstore=self.tmpstore
+        )
 
         return deform.Form(schema,buttons=['submit'])
 
@@ -37,7 +60,18 @@ class ImportViews(object):
                 return dict(form=e.render())
 
             from ..tasks.data_import import import_from_url
-            result=import_from_url.delay(appstruct['url'])
+
+            if appstruct['content'] or appstruct['upload']:
+
+                if appstruct['content']:
+                    content=appstruct['content']
+                elif appstruct['upload']:
+                    content=appstruct['upload']['fp'].read().decode('cp437')
+            else:
+                content=None
+
+            result=import_from_url.delay(appstruct['url'], content)
+
             redirect_url=self.request.route_url(ResidenceCRUD.routes['list'])
 
             return HTTPFound(
