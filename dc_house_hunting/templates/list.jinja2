@@ -2,6 +2,10 @@
 
 {% block content %}
 
+  {% if filter_form is defined %}
+    {{filter_form | safe}}
+  {% endif %}
+
 <h1>{{view.title_plural}}</h1>
 <a href="{{request.route_url(view.routes['new'])}}" class="btn btn-primary pull-right">New</a>
     <div class="form-group">

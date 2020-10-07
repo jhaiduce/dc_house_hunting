@@ -5,6 +5,7 @@ from colanderalchemy import SQLAlchemySchemaNode
 import colander
 import deform
 from sqlalchemy import or_, and_
+from .header import view_with_header
 
 def submit_update_score_task(success,residence_id):
     from ..tasks.scores import update_scores
@@ -23,7 +24,19 @@ def get_listingstate_widget(node,kw):
     from ..models import ListingState
     dbsession=kw['request'].dbsession
     listingstates=dbsession.query(ListingState)
-    choices=[('','')]+[(listingstate.id, listingstate.name) for listingstate in listingstates]
+    choices=[('','')] + \
+        [(listingstate.id, listingstate.name)
+         for listingstate in listingstates]
+    return deform.widget.SelectWidget(values=choices)
+
+@colander.deferred
+def get_listingstate_filter_widget(node,kw):
+    from ..models import ListingState
+    dbsession=kw['request'].dbsession
+    listingstates=dbsession.query(ListingState)
+    choices=[('default','Default')] + [('any','Any')] + \
+        [(listingstate.id, listingstate.name)
+         for listingstate in listingstates]
     return deform.widget.SelectWidget(values=choices)
 
 @colander.deferred
@@ -151,6 +164,116 @@ def seen(obj):
 
 sort_columns=[ 'seen','address','score','bedrooms','bathrooms',
     'area','price','hoa_fee','url','monthly_cost']
+
+class RangeWidget(deform.widget.Widget):
+    template="dc_house_hunting:templates/range.pt"
+    type_name = "range"
+
+    _pstruct_schema = colander.SchemaNode(
+        colander.Mapping(),
+        colander.SchemaNode(deform.widget._StrippedString(), name="min"),
+        colander.SchemaNode(deform.widget._StrippedString(), name="max"),
+    )
+
+    def serialize(self, field, cstruct=None, **kw):
+        if cstruct is colander.null:
+            range_min = ""
+            range_max = ""
+        else:
+            if cstruct['min'] is colander.null:
+                range_min=''
+            else:
+                range_min = cstruct['min']
+
+            if cstruct['max'] is colander.null:
+                range_max = ''
+            else:
+                range_max = cstruct['max']
+
+        kw.setdefault("range_min", range_min)
+        kw.setdefault("range_max", range_max)
+
+        readonly = kw.get("readonly", self.readonly)
+        template = readonly and self.readonly_template or self.template
+        values = self.get_template_values(field, cstruct, kw)
+        return field.renderer(template, **values)
+
+    def deserialize(self, field, pstruct):
+        if pstruct is colander.null:
+            return colander.null
+        else:
+            try:
+                validated = self._pstruct_schema.deserialize(pstruct)
+            except colander.Invalid as exc:
+                raise colander.Invalid(field.schema, deform.widget.text_("Invalid pstruct: %s" % exc))
+
+            return validated
+
+def Range(fieldtype):
+
+    class RangeMapping(colander.MappingSchema):
+        minimum=colander.SchemaNode(
+            fieldtype,
+            name='min',
+            label='min',
+            missing=None)
+        maximum=colander.SchemaNode(
+            fieldtype,
+            name='max',
+            label='max',
+            missing=None)
+        widget=RangeWidget()
+
+    return RangeMapping()
+
+@colander.deferred
+def get_loctype_widget(node, kw):
+
+    loctypes = kw['request'].dbsession.query(
+        LocationType).order_by(LocationType.id)
+    choices=[(loctype.id,loctype.name) for loctype in loctypes]
+    return deform.widget.SelectWidget(values=choices)
+
+class FilterSchema(colander.MappingSchema):
+
+    sort=colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.HiddenWidget(),
+        validator=colander.OneOf(sort_columns))
+    order=colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.HiddenWidget(),
+        validator=colander.OneOf(['asc','desc']))
+
+    price=Range(colander.Decimal())
+    monthly_cost=Range(colander.Decimal())
+    score=Range(colander.Float())
+    bedrooms=Range(colander.Integer())
+    bathrooms=Range(colander.Integer())
+    floorspace=Range(colander.Float())
+    seen=colander.SchemaNode(
+        colander.Boolean(),
+        widget=deform.widget.SelectWidget(
+            values=[
+                (None,'Any'),
+                (False,'False'),
+                (True,'True'),
+            ]
+        )
+    )
+    rejected=colander.SchemaNode(
+        colander.Boolean(),
+        widget=deform.widget.SelectWidget(
+            values=[
+                (None,'Any'),
+                (False,'False'),
+                (True,'True'),
+            ]
+        )
+    )
+    listing_state=colander.SchemaNode(
+        colander.Integer(),default=1,widget=get_listingstate_filter_widget
+    )
 
 class ResidenceCRUD(CRUDView):
 
@@ -282,27 +405,37 @@ class ResidenceCRUD(CRUDView):
 
         query=query.filter(
             or_(Residence.rejected!=True, Residence.rejected==None)
-        ).outerjoin(
-            Residence.listingstate
-        ).filter(
-            and_(
+        )
 
-                # Filter out withdrawn and closed listings
-                or_(
-                    and_(
-                        ListingState.name!='Withdrawn',
-                        ListingState.name!='Closed',
+        listingstate_filter=self.request.params.get('listing_state','default')
+        if listingstate_filter=='default':
+            query=query.outerjoin(
+                Residence.listingstate
+            ).filter(
+                and_(
+
+                    # Filter out withdrawn and closed listings
+                    or_(
+                        and_(
+                            ListingState.name!='Withdrawn',
+                            ListingState.name!='Closed',
+                        ),
+                        Residence.listingstate_id==None,
                     ),
-                    Residence.listingstate_id==None,
-                ),
 
-                # Filter out rejected listings
-                or_(
-                    Residence.rejected==False,
-                    Residence.rejected==None
+                    # Filter out rejected listings
+                    or_(
+                        Residence.rejected==False,
+                        Residence.rejected==None
+                    )
                 )
             )
-        )
+        elif listingstate_filter in [
+                listingstate.name
+                for listingstate in self.request.dbsession.query(ListingState)]:
+            query = query.outerjoin(
+                Residence.listingstate
+            ).filter(ListingState.name == listingstate_filter)
 
         sort_field=self.request.params.get('sort','score')
         order=self.request.params.get('order','desc')
@@ -316,5 +449,35 @@ class ResidenceCRUD(CRUDView):
             sort=sort.desc()
 
         return query.order_by(sort)
+
+    @property
+    def filter_form(self):
+        schema=FilterSchema().bind(request=self.request)
+        return deform.Form(schema, buttons=['apply filters'], method='GET')
+
+    @view_with_header
+    def list(self):
+        """
+        List all items for a Model. This is the default view that can be
+        overridden by subclasses to change its behavior.
+
+        :return: A dict with a single key ``items`` that is a query which when
+            iterating over yields all items to be listed.
+        """
+
+        items = self.get_list_query()
+
+        controls=self.request.GET.items()
+        try:
+            appstruct=self.filter_form.validate(controls)
+        except deform.ValidationFailure as e:
+            raise
+            filter_form=e.render()
+        else:
+            filter_form=self.filter_form.render(dict(controls))
+
+        retparams = {'items': items, 'filter_form': filter_form}
+
+        return retparams
 
     url_path='/residence'

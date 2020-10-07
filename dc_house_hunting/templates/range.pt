@@ -1,0 +1,27 @@
+<div i18n:domain="deform"
+      tal:omit-tag=""
+      tal:define="oid oid|field.oid;
+                  css_class css_class|field.widget.css_class;
+                  style style|field.widget.style;
+                  autofocus autofocus|field.autofocus;
+                  type_name type_name|field.widget.type_name;">
+  ${field.start_mapping()}
+  <div class="row">
+    <div class="col-xs-6"><div class="input-group">
+      <span class="input-group-addon" i18n:translate="">Min</span>
+      <input name="min" value="${range_min}"
+             class="span2 form-control ${css_class or ''}"
+             tal:attributes="style style;
+                             autofocus autofocus;"
+             id="${oid}-min"/>
+    </div></div>
+    <div class="col-xs-6"><div class="input-group">
+      <span class="input-group-addon" i18n:translate="">Max</span>
+      <input name="max" value="${range_max}"
+             class="span2 form-control ${css_class or ''}"
+             tal:attributes="style style;"
+             id="${oid}-max"/>
+    </div></div>
+  </div>
+  ${field.end_mapping()}
+</div>
