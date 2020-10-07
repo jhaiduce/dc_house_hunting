@@ -68,7 +68,7 @@ def import_realtor_com(content, url, dbsession=None):
     parsed_url=urlparse(url)
 
     if parsed_url.path.startswith('/realestateandhomes-detail'):
-        return import_realtor_com_detail(content, url, dbsession)
+        return [import_realtor_com_detail(content, url, dbsession)]
 
 def import_brightmls(content,url=None,dbsession=None):
     
