@@ -227,4 +227,5 @@ class DataImportTests(BaseTest):
         residence=import_realtor_com_detail(open('realtor_com_detail_test.html').read(),dbsession=self.session)
         self.assertEqual(residence.price,Decimal(679000))
         self.assertEqual(residence.location.street_address,'2508 36th Pl SE')
-        self.assertEqual(residence.parkingtype.name,'Private garage')
+        self.assertEqual(residence.listingstate.name,'Active')
+        self.assertEqual(residence.parking.name,'Private garage')
