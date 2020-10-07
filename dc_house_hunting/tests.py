@@ -36,6 +36,14 @@ class BaseTest(unittest.TestCase):
 
         self.session = get_tm_session(session_factory, transaction.manager)
 
+        from .models.housing_search_models import ParkingType, ListingState
+
+        self.session.add(ParkingType(name='Private garage'))
+        self.session.add(ParkingType(name='Carport'))
+        self.session.add(ParkingType(name='Driveway'))
+
+        self.session.add(ListingState(name='Active'))
+
     def init_database(self):
         from .models.meta import Base
         Base.metadata.create_all(self.engine)
@@ -56,7 +64,6 @@ class TestCRUD(BaseTest):
         from .models.housing_search_models import ParkingType
 
         self.session.add(ResidenceType(id=1,name='House'))
-        self.session.add(ParkingType(id=1,name='Street'))
 
     def test_residence(self):
 
@@ -214,3 +221,10 @@ class DataImportTests(BaseTest):
 
         from .tasks.data_import import import_brightmls
         import_brightmls(open('brightmls_testdata.html').read())
+
+    def test_import_realtor_com(self):
+        from .tasks.data_import import import_realtor_com_detail
+        residence=import_realtor_com_detail(open('realtor_com_detail_test.html').read(),dbsession=self.session)
+        self.assertEqual(residence.price,Decimal(679000))
+        self.assertEqual(residence.location.street_address,'2508 36th Pl SE')
+        self.assertEqual(residence.parkingtype.name,'Private garage')

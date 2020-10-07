@@ -1,4 +1,4 @@
-from ..models.housing_search_models import Residence, Location
+from ..models.housing_search_models import Residence, Location, ListingState, ParkingType
 from ..celery import celery
 from bs4 import BeautifulSoup
 import requests
@@ -13,6 +13,62 @@ import requests
 
 from decimal import Decimal
 import re
+
+def import_realtor_com_detail(content, url=None, dbsession=None):
+
+    soup=BeautifulSoup(content,features='lxml')
+
+    import json
+
+    data=json.loads(soup.find(id='__NEXT_DATA__').contents[0])
+    property_data=data['props']['pageProps']['property']
+    address_data=property_data['location']['address']
+
+    details=property_data['details']
+
+    residence = Residence(
+        price=property_data['list_price'],
+        url=url,
+        location=Location(
+            street_address=address_data['line'],
+            city=address_data['city'],
+            state=address_data['state_code'],
+            postal_code=address_data['postal_code'],
+            lat=address_data['coordinate']['lat'],
+            lon=address_data['coordinate']['lon']
+        ),
+        bedrooms=property_data['description']['beds'],
+        bathrooms=property_data['description']['baths_full'],
+        half_bathrooms=property_data['description']['baths_half'],
+        area=property_data['description']['sqft'],
+        lotsize=property_data['description']['lot_sqft']/43560,
+    )
+
+    if property_data['status']=='for_sale':
+        residence.listingstate=dbsession.query(ListingState).filter(ListingState.name=='Active').one()
+
+    if property_data['description']['garage']:
+        residence.parking=dbsession.query(ParkingType).filter(ParkingType.name=='Private garage').one()
+    else:
+        try:
+            parking_text=next(section['text'] for section in details.property_data if section['category']=='Garage and Parking')
+        except StopIteration:
+            pass
+        else:
+            if any(['carport' in text.lower() for text in parking_text]):
+                residence.parking=dbsession.query(ParkingType).filter(ParkingType.name=='Carport').one()
+            elif any(['driveway' in text.lower() for text in parking_text]):
+                residence.parking=dbsession.query(ParkingType).filter(ParkingType.name=='Driveway').one()
+
+    return residence
+
+def import_realtor_com(content, url, dbsession=None):
+    from urllib.parse import urlparse
+
+    parsed_url=urlparse(url)
+
+    if parsed_url.path.startswith('/realestateandhomes-detail'):
+        return import_realtor_com_detail(content, url, dbsession)
 
 def import_brightmls(content,url=None,dbsession=None):
     
@@ -112,6 +168,8 @@ def import_from_url(url):
 
     if hostname.endswith('brightmls.com'):
         objects=import_brightmls(content,url,dbsession)
+    elif hostname.endswith('realtor.com'):
+        objects=import_realtor_com(content,url,dbsession)
 
     for obj in objects:
         dbsession.add(obj)
