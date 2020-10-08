@@ -156,13 +156,53 @@ class BaseTest(unittest.TestCase):
 
         resp=self.session.post(
             'https://localhost.localdomain/import',
-            data={
-                'submit':'submit',
-                'url':'https://www.realtor.com/realestateandhomes-detail/2508-36th-Pl-SE_Washington_DC_20020_M61723-48772',
+            headers={
+                'Content-Type':'multipart/form-data; boundary=---------------------------350037505235270160363570564592'
             },
-            files={
-                'upload':open('realtor_com_detail_test.html')
-            })
+            data=('''-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="_charset_"
+
+UTF-8
+-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="__formid__"
+
+deform
+-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="url"
+
+https://www.realtor.com/realestateandhomes-detail/2508-36th-Pl-SE_Washington_DC_20020_M61723-48772
+-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="content"
+
+
+-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="__start__"
+
+upload:mapping
+-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="upload"; filename="realtor_com_detail_test.html"
+Content-Type: text/html
+
+''' + \
+
+open('realtor_com_detail_test.html','rb').read().decode('latin-1') + \
+
+    '''
+-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="uid"
+
+29D6UADLFM
+-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="__end__"
+
+upload:mapping
+-----------------------------350037505235270160363570564592
+Content-Disposition: form-data; name="submit"
+
+submit
+-----------------------------350037505235270160363570564592--
+    ''').encode('utf-8')
+        )
 
         # Check that we got redirected
         try:
