@@ -51,7 +51,7 @@ def import_realtor_com_detail(content, url=None, dbsession=None):
         residence.parking=dbsession.query(ParkingType).filter(ParkingType.name=='Private garage').one()
     else:
         try:
-            parking_text=next(section['text'] for section in details.property_data if section['category']=='Garage and Parking')
+            parking_text=next(section['text'] for section in property_data['details'] if section['category']=='Garage and Parking')
         except StopIteration:
             pass
         else:
