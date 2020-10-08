@@ -234,6 +234,16 @@ class DataImportTests(BaseTest):
         self.assertAlmostEqual(residence.area, 2256, places=1)
         self.assertEqual(residence.parking.name,'Private garage')
 
+        residence=import_realtor_com_detail(open('realtor_com_detail_test1.html').read(),dbsession=self.session)
+        self.assertEqual(residence.price,Decimal(669000))
+        self.assertEqual(residence.location.street_address,'3823 Pope St SE')
+        self.assertEqual(residence.listingstate.name,'Active')
+        self.assertEqual(residence.bedrooms,5)
+        self.assertEqual(residence.bathrooms,3)
+        self.assertAlmostEqual(residence.lotsize, 0.1184573, places=6)
+        self.assertAlmostEqual(residence.area, 2596, places=1)
+        self.assertEqual(residence.parking.name,'Driveway')
+
     def test_import_view(self):
         from .views.data_import import ImportViews
         from cgi import FieldStorage
