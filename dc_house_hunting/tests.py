@@ -228,6 +228,10 @@ class DataImportTests(BaseTest):
         self.assertEqual(residence.price,Decimal(679000))
         self.assertEqual(residence.location.street_address,'2508 36th Pl SE')
         self.assertEqual(residence.listingstate.name,'Active')
+        self.assertEqual(residence.bedrooms,3)
+        self.assertEqual(residence.bathrooms,3)
+        self.assertAlmostEqual(residence.lotsize, 0.109045, places=6)
+        self.assertAlmostEqual(residence.area, 2256, places=1)
         self.assertEqual(residence.parking.name,'Private garage')
 
     def test_import_view(self):
