@@ -276,7 +276,7 @@ class FilterSchema(colander.MappingSchema):
             ]
         ),
         valid=colander.OneOf(['any','false','true']),
-        missing=None
+        missing='any'
     )
     rejected=colander.SchemaNode(
         colander.String(),
@@ -288,7 +288,7 @@ class FilterSchema(colander.MappingSchema):
             ]
         ),
         valid=colander.OneOf(['any','false','true']),
-        missing=False
+        missing='false'
     )
     listingstate=colander.SchemaNode(
         colander.String(),default='default',widget=get_listingstate_filter_widget,
