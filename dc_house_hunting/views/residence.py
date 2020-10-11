@@ -30,12 +30,22 @@ def get_listingstate_widget(node,kw):
     return deform.widget.SelectWidget(values=choices)
 
 @colander.deferred
+def get_listingstate_valid(node,kw):
+    from ..models import ListingState
+    dbsession=kw['request'].dbsession
+    listingstates=dbsession.query(ListingState)
+    return colander.OneOf(
+        ['default','any']+[
+            str(listingstate.id) for listingstate in listingstates
+        ])
+
+@colander.deferred
 def get_listingstate_filter_widget(node,kw):
     from ..models import ListingState
     dbsession=kw['request'].dbsession
     listingstates=dbsession.query(ListingState)
     choices=[('default','Default')] + [('any','Any')] + \
-        [(listingstate.id, listingstate.name)
+        [(str(listingstate.id), listingstate.name)
          for listingstate in listingstates]
     return deform.widget.SelectWidget(values=choices)
 
@@ -85,6 +95,8 @@ def sort_label(field,label=None,current_order='desc',current_field=None):
         if current_order=='desc':
             order='asc'
         elif current_order=='asc':
+            order='desc'
+        else:
             order='desc'
     else:
         order='desc'
@@ -223,6 +235,7 @@ def Range(fieldtype):
             label='max',
             missing=None)
         widget=RangeWidget()
+        missing={'min':None,'max':None}
 
     return RangeMapping()
 
@@ -239,11 +252,13 @@ class FilterSchema(colander.MappingSchema):
     sort=colander.SchemaNode(
         colander.String(),
         widget=deform.widget.HiddenWidget(),
-        validator=colander.OneOf(sort_columns))
+        validator=colander.OneOf(sort_columns),
+        missing='score')
     order=colander.SchemaNode(
         colander.String(),
         widget=deform.widget.HiddenWidget(),
-        validator=colander.OneOf(['asc','desc']))
+        validator=colander.OneOf(['asc','desc']),
+        missing='desc')
 
     price=Range(colander.Decimal())
     monthly_cost=Range(colander.Decimal())
@@ -252,27 +267,34 @@ class FilterSchema(colander.MappingSchema):
     bathrooms=Range(colander.Integer())
     floorspace=Range(colander.Float())
     seen=colander.SchemaNode(
-        colander.Boolean(),
+        colander.String(),
         widget=deform.widget.SelectWidget(
             values=[
-                (None,'Any'),
-                (False,'False'),
-                (True,'True'),
+                ('any','Any'),
+                ('false','False'),
+                ('true','True'),
             ]
-        )
+        ),
+        valid=colander.OneOf(['any','false','true']),
+        missing=None
     )
     rejected=colander.SchemaNode(
-        colander.Boolean(),
+        colander.String(),
         widget=deform.widget.SelectWidget(
             values=[
-                (None,'Any'),
-                (False,'False'),
-                (True,'True'),
+                ('any','Any'),
+                ('false','False'),
+                ('true','True'),
             ]
-        )
+        ),
+        valid=colander.OneOf(['any','false','true']),
+        missing=False
     )
-    listing_state=colander.SchemaNode(
-        colander.Integer(),default=1,widget=get_listingstate_filter_widget
+    listingstate=colander.SchemaNode(
+        colander.String(),default='default',widget=get_listingstate_filter_widget,
+        valid=get_listingstate_valid,
+        title='Listing state',
+        missing='default'
     )
 
 class ResidenceCRUD(CRUDView):
@@ -400,42 +422,70 @@ class ResidenceCRUD(CRUDView):
 
         return appstruct
 
-    def get_list_query(self):
+    def get_list_query(self,appstruct):
         query=super(ResidenceCRUD,self).get_list_query()
 
-        query=query.filter(
-            or_(Residence.rejected!=True, Residence.rejected==None)
-        )
+        rejected=appstruct.get('rejected','false')
+        if rejected == 'false':
+            query=query.filter(
+                or_(Residence.rejected==False, Residence.rejected==None)
+            )
+        elif rejected == 'true':
+            query=query.filter(
+                Residence.rejected==True
+            )
 
-        listingstate_filter=self.request.params.get('listing_state','default')
-        if listingstate_filter=='default':
+        seen=appstruct.get('seen','any')
+        if seen == 'false':
+            query=query.filter(
+                or_(Residence.seen==False, Residence.seen==None)
+            )
+        elif seen == 'true':
+            query=query.filter(Residence.seen==True)
+
+        if appstruct['listingstate']=='default':
             query=query.outerjoin(
                 Residence.listingstate
             ).filter(
-                and_(
-
-                    # Filter out withdrawn and closed listings
-                    or_(
-                        and_(
-                            ListingState.name!='Withdrawn',
-                            ListingState.name!='Closed',
-                        ),
-                        Residence.listingstate_id==None,
+                # Filter out withdrawn and closed listings
+                or_(
+                    and_(
+                        ListingState.name!='Withdrawn',
+                        ListingState.name!='Closed',
                     ),
-
-                    # Filter out rejected listings
-                    or_(
-                        Residence.rejected==False,
-                        Residence.rejected==None
-                    )
+                    Residence.listingstate_id==None,
                 )
             )
-        elif listingstate_filter in [
-                listingstate.name
-                for listingstate in self.request.dbsession.query(ListingState)]:
-            query = query.outerjoin(
-                Residence.listingstate
-            ).filter(ListingState.name == listingstate_filter)
+        elif appstruct['listingstate'] != 'any':
+            try:
+                listingstate_id=int(appstruct['listingstate'])
+            except:
+                pass
+            else:
+                if listingstate_id in [
+                        listingstate.id
+                        for listingstate in
+                        self.request.dbsession.query(ListingState)]:
+                    query = query.outerjoin(
+                        Residence.listingstate
+                    ).filter(ListingState.id == listingstate_id)
+
+        for field in ['price','monthly_cost','score','bedrooms','bathrooms','floorspace']:
+            field_mapper={
+                'floorspace':Residence.area
+            }
+
+            column=field_mapper.get(field,None)
+
+            if column is None: column=getattr(Residence,field)
+
+            filter_range=appstruct.get(field)
+
+            if filter_range['min']:
+                query=query.filter(column >= filter_range['min'])
+
+            if filter_range['max']:
+                query=query.filter(column <= filter_range['max'])
 
         sort_field=self.request.params.get('sort','score')
         order=self.request.params.get('order','desc')
@@ -465,16 +515,17 @@ class ResidenceCRUD(CRUDView):
             iterating over yields all items to be listed.
         """
 
-        items = self.get_list_query()
+        controls=list(self.request.GET.items())
 
-        controls=self.request.GET.items()
         try:
             appstruct=self.filter_form.validate(controls)
         except deform.ValidationFailure as e:
-            raise
             filter_form=e.render()
+            appstruct={}
         else:
-            filter_form=self.filter_form.render(dict(controls))
+            filter_form=self.filter_form.render(appstruct)
+
+        items = self.get_list_query(appstruct)
 
         retparams = {'items': items, 'filter_form': filter_form}
 
