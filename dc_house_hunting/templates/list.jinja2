@@ -3,7 +3,13 @@
 {% block content %}
 
   {% if filter_form is defined %}
-    {{filter_form | safe}}
+    <a class="btn btn-primary" data-toggle="collapse" data-target="#filterFormContainer">Edit filters</a>
+    <div id="filterSummary">
+      Filters applied: {{ filter_summary }}
+    </div>
+    <div class="collapse" id="filterFormContainer">
+      {{filter_form | safe}}
+    </div>
   {% endif %}
 
 <h1>{{view.title_plural}}</h1>

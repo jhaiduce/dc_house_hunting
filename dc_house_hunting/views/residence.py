@@ -527,7 +527,50 @@ class ResidenceCRUD(CRUDView):
 
         items = self.get_list_query(appstruct)
 
-        retparams = {'items': items, 'filter_form': filter_form}
+        filter_summary=[]
+
+        for field in ['price','monthly_cost','score','bedrooms','bathrooms','floorspace']:
+            range_filter=appstruct.get(field,{'min':None,'max':None})
+
+            if appstruct[field]['min'] or appstruct[field]['max']:
+                filter_summary.append(
+                    '{name}: {range_min} - {range_max}'.format(
+                        name=field.replace('_',' ').capitalize(),
+                        range_min=range_filter['min'] or '',
+                        range_max=range_filter['max'] or ''
+                    ))
+
+        if appstruct.get('seen','any')!='any':
+            if appstruct['seen']=='true':
+                filter_summary.append('Seen: y')
+            if appstruct['seen']=='false':
+                filter_summary.append('Seen: n')
+
+        if appstruct.get('rejected','any')!='any':
+            if appstruct['rejected']=='true':
+                filter_summary.append('Rejected: y')
+            if appstruct['rejected']=='false':
+                filter_summary.append('Rejected: n')
+
+        if appstruct.get('listingstate','default')!='any':
+            if appstruct['listingstate']=='default':
+                filter_summary.append('Listing state: Not closed or withdrawn')
+            else:
+                try:
+                    listingstate_id=int(appstruct['listingstate'])
+                except:
+                    pass
+                else:
+                    filter_summary.append('Listing state: {}'.format(
+                        self.request.dbsession.query(ListingState).filter(
+                            ListingState.id==listingstate_id).one().name
+                    ))
+
+        retparams = {
+            'items': items,
+            'filter_form': filter_form,
+            'filter_summary': ', '.join(filter_summary)
+        }
 
         return retparams
 
