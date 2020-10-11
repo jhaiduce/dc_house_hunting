@@ -503,7 +503,7 @@ class ResidenceCRUD(CRUDView):
     @property
     def filter_form(self):
         schema=FilterSchema().bind(request=self.request)
-        return deform.Form(schema, buttons=['apply filters'], method='GET')
+        return deform.Form(schema, buttons=['update filters'], method='GET')
 
     @view_with_header
     def list(self):
