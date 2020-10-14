@@ -443,7 +443,7 @@ class ResidenceCRUD(CRUDView):
         elif seen == 'true':
             query=query.filter(Residence.seen==True)
 
-        if appstruct['listingstate']=='default':
+        if appstruct.get('listingstate','default')=='default':
             query=query.outerjoin(
                 Residence.listingstate
             ).filter(
@@ -479,7 +479,7 @@ class ResidenceCRUD(CRUDView):
 
             if column is None: column=getattr(Residence,field)
 
-            filter_range=appstruct.get(field)
+            filter_range=appstruct.get(field,{'min':None,'max':None})
 
             if filter_range['min']:
                 query=query.filter(column >= filter_range['min'])
@@ -532,7 +532,7 @@ class ResidenceCRUD(CRUDView):
         for field in ['price','monthly_cost','score','bedrooms','bathrooms','floorspace']:
             range_filter=appstruct.get(field,{'min':None,'max':None})
 
-            if appstruct[field]['min'] or appstruct[field]['max']:
+            if range_filter['min'] or range_filter['max']:
                 filter_summary.append(
                     '{name}: {range_min} - {range_max}'.format(
                         name=field.replace('_',' ').capitalize(),
@@ -553,7 +553,7 @@ class ResidenceCRUD(CRUDView):
                 filter_summary.append('Rejected: n')
 
         if appstruct.get('listingstate','default')!='any':
-            if appstruct['listingstate']=='default':
+            if appstruct.get('listingstate','default')=='default':
                 filter_summary.append('Listing state: Not closed or withdrawn')
             else:
                 try:
