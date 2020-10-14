@@ -36,13 +36,19 @@ class BaseTest(unittest.TestCase):
 
         self.session = get_tm_session(session_factory, transaction.manager)
 
-        from .models.housing_search_models import ParkingType, ListingState
+        from .models.housing_search_models import ParkingType, ListingState, ResidenceType
 
-        self.session.add(ParkingType(name='Private garage'))
-        self.session.add(ParkingType(name='Carport'))
-        self.session.add(ParkingType(name='Driveway'))
+        self.session.add(ResidenceType(id=1,name='House'))
+        self.session.add(ResidenceType(id=2,name='Townhouse'))
 
-        self.session.add(ListingState(name='Active'))
+        self.session.add(ParkingType(id=1,name='Street'))
+        self.session.add(ParkingType(id=2,name='Private garage'))
+        self.session.add(ParkingType(id=3,name='Driveway'))
+        self.session.add(ParkingType(id=4,name='Carport'))
+
+        self.session.add(ListingState(id=1,name='Active'))
+        self.session.add(ListingState(id=2,name='Closed'))
+        self.session.add(ListingState(id=3,name='Withdrawn'))
 
     def init_database(self):
         from .models.meta import Base
@@ -65,17 +71,6 @@ class TestCRUD(BaseTest):
         from .models.housing_search_models import ParkingType
         from .models.housing_search_models import ListingState
         from .models.housing_search_models import Location
-
-        self.session.add(ResidenceType(id=1,name='House'))
-        self.session.add(ResidenceType(id=2,name='Townhouse'))
-
-        self.session.add(ParkingType(id=1,name='Street'))
-        self.session.add(ParkingType(id=2,name='Private garage'))
-        self.session.add(ParkingType(id=3,name='Driveway'))
-
-        self.session.add(ListingState(id=1,name='Active'))
-        self.session.add(ListingState(id=2,name='Closed'))
-        self.session.add(ListingState(id=3,name='Withdrawn'))
 
         self.session.add(Residence(
             id=1,
