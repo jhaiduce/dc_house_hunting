@@ -60,10 +60,104 @@ class TestCRUD(BaseTest):
     def setUp(self):
         super(TestCRUD, self).setUp()
 
+        from .models.housing_search_models import Residence
         from .models.housing_search_models import ResidenceType
         from .models.housing_search_models import ParkingType
+        from .models.housing_search_models import ListingState
+        from .models.housing_search_models import Location
 
         self.session.add(ResidenceType(id=1,name='House'))
+        self.session.add(ResidenceType(id=2,name='Townhouse'))
+
+        self.session.add(ParkingType(id=1,name='Street'))
+        self.session.add(ParkingType(id=2,name='Private garage'))
+        self.session.add(ParkingType(id=3,name='Driveway'))
+
+        self.session.add(ListingState(id=1,name='Active'))
+        self.session.add(ListingState(id=2,name='Closed'))
+        self.session.add(ListingState(id=3,name='Withdrawn'))
+
+        self.session.add(Residence(
+            id=1,
+            location=Location(
+                street_address='123 1st St',
+                city='Washington',
+                state='DC',
+                postal_code='20003'
+            ),
+            rejected=False,
+            seen=True,
+            listingstate_id=1,
+        ))
+
+        self.session.add(Residence(
+            id=2,
+            location=Location(
+                street_address='123 2nd St',
+                city='Washington',
+                state='DC',
+                postal_code='20003'
+            ),
+            rejected=None,
+            seen=None,
+            listingstate_id=None,
+        ))
+
+        self.session.add(Residence(
+            id=3,
+            location=Location(
+                street_address='123 3rd St',
+                city='Washington',
+                state='DC',
+                postal_code='20003'
+            ),
+            rejected=False,
+            seen=None,
+            listingstate_id=2,
+            price=Decimal(600000),
+        ))
+
+        self.session.add(Residence(
+            id=4,
+            location=Location(
+                street_address='123 4th St',
+                city='Washington',
+                state='DC',
+                postal_code='20003'
+            ),
+            rejected=False,
+            seen=False,
+            listingstate_id=1,
+            price=Decimal(820000),
+        ))
+
+        self.session.add(Residence(
+            id=5,
+            location=Location(
+                street_address='123 5th St',
+                city='Washington',
+                state='DC',
+                postal_code='20003'
+            ),
+            rejected=True,
+            seen=True,
+            listingstate_id=1,
+            price=Decimal(700000),
+        ))
+
+        self.session.add(Residence(
+            id=6,
+            location=Location(
+                street_address='123 6th St',
+                city='Washington',
+                state='DC',
+                postal_code='20003'
+            ),
+            rejected=False,
+            seen=True,
+            listingstate_id=1,
+            price=Decimal(700000),
+        ))
 
     def test_residence(self):
 
@@ -112,6 +206,103 @@ class TestCRUD(BaseTest):
 
         # Check that the new entry is listed
         self.assertIn(residence,resp['items'])
+
+        self.session.delete(residence)
+
+    def test_list_filters(self):
+
+        from .views.residence import ResidenceCRUD
+        from .models import Residence
+
+        request=testing.DummyRequest(dbsession=self.session)
+
+        views=ResidenceCRUD(request)
+
+        resp=views.list()
+
+        self.assertIn(1,[item.id for item in resp['items']])
+        self.assertIn(2,[item.id for item in resp['items']])
+        self.assertNotIn(3,[item.id for item in resp['items']])
+        self.assertIn(4,[item.id for item in resp['items']])
+        self.assertNotIn(5,[item.id for item in resp['items']])
+        self.assertIn(6,[item.id for item in resp['items']])
+
+        from webob.multidict import MultiDict
+
+        request=testing.DummyRequest(
+            params=MultiDict((
+                ('__start__','price:mapping'),
+                ('min',''),
+                ('max','800000'),
+                ('__end__','price:mapping')
+            )),
+            dbsession=self.session)
+
+        views=ResidenceCRUD(request)
+
+        resp=views.list()
+
+        self.assertNotIn(1,[item.id for item in resp['items']])
+        self.assertNotIn(2,[item.id for item in resp['items']])
+        self.assertNotIn(3,[item.id for item in resp['items']])
+        self.assertNotIn(4,[item.id for item in resp['items']])
+        self.assertNotIn(5,[item.id for item in resp['items']])
+        self.assertIn(6,[item.id for item in resp['items']])
+
+        request=testing.DummyRequest(
+            params=MultiDict((
+                ('__start__','price:mapping'),
+                ('min',''),
+                ('max','800000'),
+                ('__end__','price:mapping'),
+                ('listingstate','any')
+            )),
+            dbsession=self.session)
+
+        views=ResidenceCRUD(request)
+
+        resp=views.list()
+
+        self.assertNotIn(1,[item.id for item in resp['items']])
+        self.assertNotIn(2,[item.id for item in resp['items']])
+        self.assertIn(3,[item.id for item in resp['items']])
+        self.assertNotIn(4,[item.id for item in resp['items']])
+        self.assertNotIn(5,[item.id for item in resp['items']])
+        self.assertIn(6,[item.id for item in resp['items']])
+
+        request=testing.DummyRequest(
+            params=MultiDict((
+                ('listingstate','any'),
+            )),
+            dbsession=self.session)
+
+        views=ResidenceCRUD(request)
+
+        resp=views.list()
+
+        self.assertIn(1,[item.id for item in resp['items']])
+        self.assertIn(2,[item.id for item in resp['items']])
+        self.assertIn(3,[item.id for item in resp['items']])
+        self.assertIn(4,[item.id for item in resp['items']])
+        self.assertNotIn(5,[item.id for item in resp['items']])
+        self.assertIn(6,[item.id for item in resp['items']])
+
+        request=testing.DummyRequest(
+            params=MultiDict((
+                ('rejected','true'),
+            )),
+            dbsession=self.session)
+
+        views=ResidenceCRUD(request)
+
+        resp=views.list()
+
+        self.assertNotIn(1,[item.id for item in resp['items']])
+        self.assertNotIn(2,[item.id for item in resp['items']])
+        self.assertNotIn(3,[item.id for item in resp['items']])
+        self.assertNotIn(4,[item.id for item in resp['items']])
+        self.assertIn(5,[item.id for item in resp['items']])
+        self.assertNotIn(6,[item.id for item in resp['items']])
 
 class ScoreTests(BaseTest):
 
