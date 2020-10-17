@@ -12,6 +12,7 @@ from sqlalchemy import (
     Boolean,
     Numeric,
     case,
+    event,
 )
 
 from decimal import Decimal
@@ -379,6 +380,11 @@ class Residence(Base):
         )
 
         return self.mortgage+self.taxes/int(12)+self.insurance/int(12) + hoa_fee
+
+@event.listens_for(Residence.price,'modified')
+def receive_modified(target,initiator):
+    # Update the mortgage payment
+    target.update_mortgage()
 
 class School(Base):
 
