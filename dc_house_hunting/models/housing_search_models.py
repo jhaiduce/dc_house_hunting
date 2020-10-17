@@ -361,7 +361,7 @@ class Residence(Base):
     def insurance(self):
         return case(
             [
-                (self.insurance_ == None, 0),
+                (self.insurance_ == None, 1500),
             ], else_ = self.insurance_)
 
     @hybrid_property
