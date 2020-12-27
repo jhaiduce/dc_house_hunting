@@ -33,10 +33,10 @@ secrets:
   dhparams:
     file: ./secrets/dhparams.pem
   ssl_certificate:
-    name: ssl_certificate.1
+    name: ssl_certificate.2
     file: ./nginx/ssl/fullchain.pem
   ssl_certificate_key:
-    name: ssl_certificate_key.1
+    name: ssl_certificate_key.2
     file: ./nginx/ssl/privkey.pem
   rabbitmq_password:
     name: rabbitmq_password.2
