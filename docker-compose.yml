@@ -6,6 +6,8 @@ services:
       resources:
         reservations:
           memory: 150M
+      placement:
+        constraints: [node.labels.db == true]
     environment:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
     configs:
