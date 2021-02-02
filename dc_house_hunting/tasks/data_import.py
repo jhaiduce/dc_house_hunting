@@ -26,6 +26,9 @@ def import_realtor_com_detail(content, url=None, dbsession=None):
 
     details=property_data['details']
 
+    lotsize=property_data['description']['lot_sqft']
+    if lotsize is not None: lotsize=lotsize/43560
+
     residence = Residence(
         price=property_data['list_price'],
         url=url,
@@ -41,7 +44,7 @@ def import_realtor_com_detail(content, url=None, dbsession=None):
         bathrooms=property_data['description']['baths_full'],
         half_bathrooms=property_data['description']['baths_half'],
         area=property_data['description']['sqft'],
-        lotsize=property_data['description']['lot_sqft']/43560,
+        lotsize=lotsize,
     )
 
     if property_data['status']=='for_sale':
