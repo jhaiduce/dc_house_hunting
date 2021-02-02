@@ -51,7 +51,7 @@ def import_realtor_com_detail(content, url=None, dbsession=None):
         residence.listingstate=dbsession.query(ListingState).filter(ListingState.name=='Active').one()
 
     if property_data['description']['garage']:
-        residence.parking=dbsession.query(ParkingType).filter(ParkingType.name=='Private garage').one()
+        residence.parkingtype=dbsession.query(ParkingType).filter(ParkingType.name=='Private garage').one()
     else:
         try:
             parking_text=next(section['text'] for section in property_data['details'] if section['category']=='Garage and Parking')
@@ -59,9 +59,9 @@ def import_realtor_com_detail(content, url=None, dbsession=None):
             pass
         else:
             if any(['carport' in text.lower() for text in parking_text]):
-                residence.parking=dbsession.query(ParkingType).filter(ParkingType.name=='Carport').one()
+                residence.parkingtype=dbsession.query(ParkingType).filter(ParkingType.name=='Carport').one()
             elif any(['driveway' in text.lower() for text in parking_text]):
-                residence.parking=dbsession.query(ParkingType).filter(ParkingType.name=='Driveway').one()
+                residence.parkingtype=dbsession.query(ParkingType).filter(ParkingType.name=='Driveway').one()
 
     return residence
 

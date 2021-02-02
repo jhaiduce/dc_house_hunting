@@ -418,7 +418,7 @@ class DataImportTests(BaseTest):
         self.assertEqual(residence.bathrooms,3)
         self.assertAlmostEqual(residence.lotsize, 0.109045, places=6)
         self.assertAlmostEqual(residence.area, 2256, places=1)
-        self.assertEqual(residence.parking.name,'Private garage')
+        self.assertEqual(residence.parkingtype.name,'Private garage')
 
         residence=import_realtor_com_detail(open('realtor_com_detail_test1.html').read(),dbsession=self.session)
         self.assertEqual(residence.price,Decimal(669000))
@@ -428,7 +428,7 @@ class DataImportTests(BaseTest):
         self.assertEqual(residence.bathrooms,3)
         self.assertAlmostEqual(residence.lotsize, 0.1184573, places=6)
         self.assertAlmostEqual(residence.area, 2596, places=1)
-        self.assertEqual(residence.parking.name,'Driveway')
+        self.assertEqual(residence.parkingtype.name,'Driveway')
 
         residence=import_realtor_com_detail(open('realtor_com_detail_test2.html').read(),dbsession=self.session)
         self.assertEqual(residence.price,Decimal(769000))
