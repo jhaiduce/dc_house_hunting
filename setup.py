@@ -26,7 +26,8 @@ requires = [
     'pyramid_nacl_session',
     'celery',
     'lxml',
-    'redis'
+    'redis',
+    'requests'
 ]
 
 tests_require = [
