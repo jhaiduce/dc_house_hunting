@@ -83,10 +83,10 @@ def finalize_residence_fields(event):
         event.obj.residencetype_id=event.appstruct['residencetype']
         event.obj.listingstate_id=event.appstruct['listingstate']
 
-    event.request.dbsession.flush()
+        event.request.dbsession.flush()
 
-    event.request.tm.get().addAfterCommitHook(
-        submit_update_score_task,args=[event.obj.id])
+        event.request.tm.get().addAfterCommitHook(
+            submit_update_score_task,args=[event.obj.id])
 
 def sort_label(field,label=None,current_order='desc',current_field=None):
 
