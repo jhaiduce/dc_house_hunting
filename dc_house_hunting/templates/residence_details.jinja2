@@ -44,17 +44,17 @@
 	<tr>
 	  <td>{{field}}</td>
 	  <td>{{'{:0.2f}'.format(getattr(residence,field)) if getattr(residence,field) is not none else '-'}}</td>
-	  <td>{{weights[field]}}</td>
-	  <td>{{scores[field]}}</td>
-	  <td>{{residence.get_score_component(field)}}</td>
+	  <td>{{'{:0.2f}'.format(weights[field])}}</td>
+	  <td>{{'{:0.3f}'.format(scores[field])}}</td>
+	  <td>{{'{:0.3f}'.format(residence.get_score_component(field))}}</td>
 	</tr>
       {% endfor %}
       <tr>
 	<th>Total</th>
 	<td></td>
-	<td>{{sum(weights.values())}}</td>
-	<td>{{sum(scores.values())}}</td>
-	<td>{{residence.compute_score()}}</td>
+	<td>{{'{:0.2f}'.format(sum(weights.values()))}}</td>
+	<td>{{'{:0.3f}'.format(sum(scores.values()))}}</td>
+	<td>{{'{:0.3f}'.format(residence.compute_score())}}</td>
       </tr>
     </table>
   </p>
