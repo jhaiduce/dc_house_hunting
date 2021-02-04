@@ -67,7 +67,7 @@ class WeightMapping(Base):
     name = Column(String(255), unique=True, nullable=False)
     kind = Column(String(255), nullable=False)
 
-    def __call__(self,x):
+    def __call__(self,x,session=None):
         return x
 
     __mapper_args__ = {
@@ -99,7 +99,7 @@ class FactorMapping(WeightMapping):
 
     factor = Column(Float, default=1, nullable=False)
 
-    def __call__(self,x):
+    def __call__(self,x,session=None):
         return x*self.factor
 
     __mapper_args__ = {
@@ -125,7 +125,7 @@ class SmootherstepMapping(WeightMapping):
     lower = Column(Float, default=0, nullable=False)
     upper = Column(Float, default=1, nullable=False)
 
-    def __call__(self,x):
+    def __call__(self,x,session=None):
         if self.lower==self.upper:
             if x>self.upper:
                 return 1
@@ -191,8 +191,10 @@ class ParkingTypeMapping(WeightMapping):
             ForeignKey('weightmapping.id'),
             primary_key=True)
 
-    def __call__(self,parkingtype_id):
-        return object_session(self).query(ParkingType).filter(ParkingType.id==parkingtype_id).one().score
+    def __call__(self,parkingtype_id,session=None):
+        if session is None:
+            session=object_session(self)
+        return session.query(ParkingType).filter(ParkingType.id==parkingtype_id).one().score
 
     __mapper_args__ = {
         'polymorphic_identity':'idmapping'
@@ -279,7 +281,8 @@ class Residence(Base):
         else:
             value=float(value)
 
-        score=WeightMapping.get(field,session)(value)
+        score_mapper=self.score_mapping_types.get(field,WeightMapping)
+        score=score_mapper.get(field,session)(value,session)
 
         if weighted:
             score=WeightFactor.get(field,session)*score
