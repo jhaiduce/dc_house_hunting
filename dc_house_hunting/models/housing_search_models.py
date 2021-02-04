@@ -268,7 +268,7 @@ class Residence(Base):
         'parkingtype_id': ParkingTypeMapping
     }
 
-    def get_score_component(self,field,session=None):
+    def get_score_component(self,field,weighted=True,session=None):
         if session is None:
             session=object_session(self)
 
@@ -279,7 +279,12 @@ class Residence(Base):
         else:
             value=float(value)
 
-        return WeightFactor.get(field,session) * WeightMapping.get(field,session)(value)
+        score=WeightMapping.get(field,session)(value)
+
+        if weighted:
+            score=WeightFactor.get(field,session)*score
+
+        return score
 
     def compute_score(self):
         score=0
