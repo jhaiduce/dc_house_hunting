@@ -450,10 +450,7 @@ class ResidenceCRUD(CRUDView):
             ).filter(
                 # Filter out withdrawn and closed listings
                 or_(
-                    and_(
-                        ListingState.name!='Withdrawn',
-                        ListingState.name!='Closed',
-                    ),
+                    ListingState.name=='Active',
                     Residence.listingstate_id==None,
                 )
             )
@@ -568,7 +565,7 @@ class ResidenceCRUD(CRUDView):
 
         if appstruct.get('listingstate','default')!='any':
             if appstruct.get('listingstate','default')=='default':
-                filter_summary.append('Listing state: Not closed or withdrawn')
+                filter_summary.append('Listing state: Active or unknown')
             else:
                 try:
                     listingstate_id=int(appstruct['listingstate'])
