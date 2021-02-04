@@ -1,11 +1,12 @@
 from pyramid.events import subscriber
 from .crud import CRUDView, ViewDbInsertEvent,ViewDbUpdateEvent
-from ..models import Residence, ListingState
+from ..models import Residence, ListingState, WeightFactor, WeightMapping
 from colanderalchemy import SQLAlchemySchemaNode
 import colander
 import deform
 from sqlalchemy import or_, and_
 from .header import view_with_header
+from pyramid.view import view_config
 
 def submit_update_score_task(success,residence_id):
     from ..tasks.scores import update_scores
@@ -575,3 +576,32 @@ class ResidenceCRUD(CRUDView):
         return retparams
 
     url_path='/residence'
+
+class ResidenceViews(object):
+    def __init__(self, request):
+        self.request = request
+
+    @view_with_header
+    @view_config(route_name='residence_details', renderer='../templates/residence_details.jinja2')
+    def details(self):
+        """
+        Display details for a Residence
+        """
+
+        residence_id=int(self.request.matchdict['residence_id'])
+
+        dbsession=self.request.dbsession
+
+        residence=dbsession.query(Residence).filter(Residence.id==residence_id).one()
+
+        weights={
+            field:WeightFactor.get(field,dbsession).weight
+            for field in residence.score_fields
+        }
+
+        scores={
+            field:residence.get_score_component(field,weighted=False)
+            for field in residence.score_fields
+        }
+
+        return dict(residence=residence,dollar_format=dollar_format,weights=weights,scores=scores,sum=sum)

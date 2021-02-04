@@ -6,3 +6,4 @@ def includeme(config):
     config.add_route('logout', '/logout')
     config.add_route('import','/import')
     config.add_route('score_weights','/score_weights')
+    config.add_route('residence_details','/residence/{residence_id}/details')

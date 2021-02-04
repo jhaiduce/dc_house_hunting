@@ -1,0 +1,62 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+
+  <h3>{{residence.location.street_address}}</h3>
+
+  <a href="{{residence.url}}">{{residence.url}}</a>
+
+  <p>
+    <table>
+      <tr><th>Listing state</th><td>{{residence.listingstate.name}}</td></tr>
+      <tr><th>Seen</th><td>{{residence.seen}}</td></tr>
+      <tr><th>Rejected</th><td>{{residence.rejected}}</td></tr>
+      <tr><th>Residence type</th><td>{{residence.residencetype.name}}</td></tr>
+      <tr><th>Bedrooms</th><td>{{residence.bedrooms}}</td></tr>
+      <tr><th>Bathrooms</th><td>{{residence.bathrooms}}{% if residence.half_bathrooms%}/{{residence.half_bathrooms}}{% endif %}</td></tr>
+      <tr><th>Area</th><td>{{residence.area}}</td></tr>
+      <tr><th>Lot size</th><td>{{residence.lotsize}}</td></tr>
+      <tr><th>Basement</th><td>{{residence.basement}}</td></tr>
+      <tr><th>Attic</th><td>{{residence.attic}}</td></tr>
+      <tr><th>Parking</th><td>{{residence.parkingtype.name}}</td></tr>
+      <tr><th>Price</th><td>{{dollar_format(residence.price)}}</td></tr>
+      <tr><th>Remarks</th><td>{{residence.remarks}}</td></tr>
+    </table>
+  </p>
+
+  <h4>Monthly cost</h4>
+  <p>
+    <table>
+      <tr><th>Mortgage</th><td style="text-align:right">{{dollar_format(residence.mortgage)}}</td></tr>
+      <tr><th>HOA fee</th><td style="text-align:right">{{dollar_format(residence.hoa_fee)}}</td></tr>
+      <tr><th>Property tax</th><td style="text-align:right">{{dollar_format(residence.taxes/12)}}</td></tr>
+      <tr><th>Insurance</th><td style="text-align:right">{{dollar_format(residence.insurance/12)}}</td></tr>
+      <tr><th>Total</th><td style="text-align:right">{{dollar_format(residence.monthly_cost)}}</td></tr>
+    </table>
+  </p>
+
+  <h4>Score breakdown</h4>
+
+  <p>
+    <table>
+      <tr><th>Item</th><th>Value</th><th>Weight</th><th>Score</th><th>Weighted score</th></tr>
+      {% for field in residence.score_fields %}
+	<tr>
+	  <td>{{field}}</td>
+	  <td>{{'{:0.2f}'.format(getattr(residence,field)) if getattr(residence,field) is not none else '-'}}</td>
+	  <td>{{weights[field]}}</td>
+	  <td>{{scores[field]}}</td>
+	  <td>{{residence.get_score_component(field)}}</td>
+	</tr>
+      {% endfor %}
+      <tr>
+	<th>Total</th>
+	<td></td>
+	<td>{{sum(weights.values())}}</td>
+	<td>{{sum(scores.values())}}</td>
+	<td>{{residence.compute_score()}}</td>
+      </tr>
+    </table>
+  </p>
+
+{% endblock content %}
