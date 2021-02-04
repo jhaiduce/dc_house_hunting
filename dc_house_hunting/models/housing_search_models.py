@@ -271,7 +271,15 @@ class Residence(Base):
     def get_score_component(self,field,session=None):
         if session is None:
             session=object_session(self)
-        return WeightFactor.get(field,session) * WeightMapping.get(field,session)(float(getattr(self,field)))
+
+        value=getattr(self,field,0)
+
+        if value is None:
+            value=0
+        else:
+            value=float(value)
+
+        return WeightFactor.get(field,session) * WeightMapping.get(field,session)(value)
 
     def compute_score(self):
         score=0
