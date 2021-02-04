@@ -31,7 +31,12 @@
 
                 {% for item in items%}
                     <tr>
-			<td><a href="{{view._edit_route(item)}}">edit</a></td>
+		      <td>
+			<a href="{{view._edit_route(item)}}">edit</a>
+			{% if hasattr(view,'_details_route') %}
+			<a href="{{view._details_route(item)}}">details</a>
+		        {% endif %}
+		      </td>
                         {% for title, col in view.iter_list_cols(item) %}
                             {% if col is true or col is false %}
                                 <td class="text-{{'success' if col else 'danger'}} text-center">

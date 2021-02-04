@@ -506,6 +506,19 @@ class ResidenceCRUD(CRUDView):
         schema=FilterSchema().bind(request=self.request)
         return deform.Form(schema, buttons=['update filters'], method='GET')
 
+    def _details_route(self, obj):
+        """
+        Get a route for the edit action based on an objects primary keys.
+
+        :param obj: The instance of a model on which the routes values should
+            be based.
+
+        :return: A URL which can be used as the routing URL for redirects or
+            displaying the URL on the page.
+        """
+        kw = self._get_route_pks(obj)
+        return self.request.route_url('residence_details', **kw)
+
     @view_with_header
     def list(self):
         """
@@ -588,7 +601,7 @@ class ResidenceViews(object):
         Display details for a Residence
         """
 
-        residence_id=int(self.request.matchdict['residence_id'])
+        residence_id=int(self.request.matchdict['id'])
 
         dbsession=self.request.dbsession
 
