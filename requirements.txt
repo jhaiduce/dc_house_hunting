@@ -34,7 +34,7 @@ plaster==1.0
 plaster-pastedeploy==0.7
 pluggy==0.13.1
 poyo==0.5.0
-py==1.9.0
+py==1.10.0
 pycparser==2.20
 Pygments==2.7.0
 PyNaCl==1.4.0
